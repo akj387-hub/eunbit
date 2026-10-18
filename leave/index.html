@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연차달력</title>
+<meta name="apple-mobile-web-app-title" content="연차달력">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#d0723f">
+<script>
+  // 홈 화면 바로가기는 ?go=1 주소로 저장돼서, 누르면 바로 앱으로 가요.
+  var APP = "https://script.google.com/macros/s/AKfycbz7ZXxbS_XMkyUFAIKmiibvEItlnHrmnhFNDqQn0z8viSVJVs_iXw4QLy9mwAGa7Sfz/exec";
+  if (new URLSearchParams(location.search).get("go") === "1") location.replace(APP);
+  else history.replaceState(null, "", "?go=1");
+</script>
+<style>
+  :root{--bg:#f6f7f2;--paper:#fff;--ink:#23281f;--muted:#69715f;--line:#dfe3d6;--accent:#d0723f;--accent-ink:#fff}
+  @media (prefers-color-scheme:dark){:root{--bg:#161a14;--paper:#1f241c;--ink:#e7eadf;--muted:#a2aa96;--line:#353c2f;--accent:#8fbf7f;--accent-ink:#13200f}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.55}
+  main{max-width:420px;margin:0 auto;padding:32px 16px;display:grid;gap:18px}
+  .head{display:flex;align-items:center;gap:14px}
+  .head img{width:64px;height:64px;border-radius:14px}
+  h1{margin:0;font-size:1.6rem}
+  .sub{margin:0;color:var(--muted);font-size:.9rem}
+  .open{display:block;text-align:center;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:700;padding:14px;border-radius:10px;font-size:1.05rem}
+  section{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  h2{margin:0 0 6px;font-size:1rem}
+  ol{margin:0;padding-left:20px}
+  li{margin:2px 0}
+</style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <img src="icon-192.png" alt="">
+    <div><h1>연차달력</h1><p class="sub">은빛도담어린이집 · 홈 화면 바로가기</p></div>
+  </div>
+  <a class="open" href="?go=1" onclick="location.replace(APP);return false;">연차달력 열기</a>
+  <section>
+    <h2>아이폰</h2>
+    <ol>
+      <li>이 화면을 <b>Safari</b>로 열어요.</li>
+      <li>아래 가운데 <b>공유 버튼</b>(네모에 위 화살표)을 눌러요.</li>
+      <li><b>홈 화면에 추가</b> → <b>추가</b>를 눌러요.</li>
+    </ol>
+  </section>
+  <section>
+    <h2>안드로이드</h2>
+    <ol>
+      <li>이 화면을 <b>크롬</b>으로 열어요.</li>
+      <li>오른쪽 위 <b>⋮</b> → <b>홈 화면에 추가</b>를 눌러요.</li>
+    </ol>
+  </section>
+</main>
+</body>
+</html>
