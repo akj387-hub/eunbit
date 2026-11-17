@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>은빛도담 교사교육관리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#f3f8f8; --paper:#fff; --ink:#26343a; --muted:#7b8b90; --line:#dce8ea; --soft:#eaf4f5;
+  --accent:#2c7a8c; --accent-dk:#1f5b69; --accent-ink:#fff; --accent-soft:#d5ebef;
+  --ok:#2f9a5b; --ok-soft:#e0f5e8; --bad:#e04f4f; --bad-soft:#ffe9e9; --warn:#b87400; --warn-soft:#fff3c8;
+  --f-display:"Jua","Noto Sans KR","Malgun Gothic",sans-serif; --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+body[data-mode=edu]{--bg:#f6f4fb;--soft:#efeaf9;--line:#e3dcf1;--accent:#5b4a9a;--accent-dk:#43367a;--accent-soft:#e1d9f5}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#141c1e;--paper:#1d282b;--ink:#e6eef0;--muted:#9fb1b6;--line:#2f3f43;--soft:#22323a;--accent:#6fc3d4;--accent-dk:#3f8b9b;--accent-ink:#0c2328;--accent-soft:#294852;
+    --ok:#7fd39b;--ok-soft:#1f3a2a;--bad:#ff8c8c;--bad-soft:#40262a;--warn:#f1c55c;--warn-soft:#3d331a;color-scheme:dark}
+  body[data-mode=edu]{--bg:#18141f;--soft:#251f33;--line:#3a3150;--accent:#b6a4f0;--accent-dk:#7c68c4;--accent-ink:#1c1530;--accent-soft:#3a3158}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 60px;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;margin:0}
+h1{font-size:1.6rem} h2{font-size:1.25rem} h3{font-size:1.05rem}
+p{margin:0} button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.muted{color:var(--muted)} .small{font-size:.85rem}
+.btn{font-family:var(--f-display);font-size:1.05rem;background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:11px 18px;box-shadow:0 3px 0 var(--accent-dk);min-height:46px}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--accent-dk)}
+.btn:disabled{opacity:.45}
+.btn.line{background:var(--paper);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent-soft),0 3px 0 var(--line)}
+.btn.bad{background:var(--bad);color:#fff;box-shadow:0 3px 0 #b33}
+.btn.block{width:100%}
+.btn.sm{font-size:.9rem;padding:6px 12px;min-height:34px;border-radius:10px}
+input[type=text],input[type=password],select,textarea{width:100%;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:10px 12px}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
+
+/* 로그인 */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.login-card{width:100%;max-width:360px;background:var(--paper);border-radius:26px;padding:28px 22px;display:grid;gap:14px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.07)}
+.login-card h1{font-size:2.1rem}
+.code-input{font-size:1.5rem;letter-spacing:.35em;text-align:center}
+.err{color:var(--bad);font-size:.9rem;min-height:1.3em}
+
+/* 머리 */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.who{font-family:var(--f-display);font-size:1.25rem}
+.prog{background:var(--soft);border-radius:16px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bar{height:10px;border-radius:9px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--ok);border-radius:9px}
+
+/* 교육 카드 */
+.edu{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+.edu:active{background:var(--soft)}
+.chk{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--muted);font-weight:700;font-size:.85rem}
+.chk.done{background:var(--ok);color:#fff}
+.edu b{display:block;font-weight:500;line-height:1.35} .edu small{color:var(--muted);display:block;line-height:1.35}
+.edu .go{margin-left:auto;color:var(--muted);font-size:1.3rem}
+.list{display:flex;flex-direction:column;gap:9px}
+
+/* 시트(팝업) */
+.sheet-bg{position:fixed;inset:0;background:rgba(10,20,25,.5);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:var(--paper);border-radius:24px 24px 0 0;padding:18px 16px 28px;display:flex;flex-direction:column;gap:12px}
+.file{display:flex;align-items:center;gap:8px;background:var(--soft);border-radius:12px;padding:8px 10px;font-size:.9rem}
+.file span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.x{border:0;background:transparent;color:var(--bad);font-size:1.2rem;padding:4px 8px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#26343a;color:#fff;padding:11px 18px;border-radius:99px;z-index:40;font-size:.95rem;max-width:90%;text-align:center}
+.pick{display:block;text-align:center;border:2px dashed var(--accent);color:var(--accent);border-radius:16px;padding:16px;font-family:var(--f-display);font-size:1.1rem;background:var(--soft)}
+.note{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:9px 12px;font-size:.88rem}
+
+/* 관리 */
+.tabs{display:flex;gap:6px;background:var(--soft);padding:5px;border-radius:14px}
+.tabs button{flex:1;border:0;background:transparent;border-radius:10px;padding:9px;font-family:var(--f-display);color:var(--muted)}
+.tabs button.on{background:var(--paper);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.pill{display:inline-block;border-radius:99px;padding:2px 10px;font-size:.8rem;font-weight:700}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.no{background:var(--bad-soft);color:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:2px solid var(--line);background:var(--paper);border-radius:99px;padding:6px 12px;font-size:.92rem}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:8px;font-family:var(--f-display)}
+.seg button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+a.dl{display:block;text-align:center;text-decoration:none}
+</style>
+</head>
+<body data-mode="edu">
+<div id="app"></div>
+<script>window.addEventListener("error", function (e) { var d = document.getElementById("app"); if (d && !d.innerHTML) d.innerHTML = '<p style="padding:20px;color:#c00">화면 오류: ' + String(e.message).replace(/</g, "&lt;") + " (줄 " + e.lineno + ":" + e.colno + ")</p><pre style=\"white-space:pre-wrap;padding:0 20px;font-size:12px\">" + String((document.documentElement.outerHTML.split("\n")[e.lineno - 1] || "").slice(Math.max(0, e.colno - 80), e.colno + 80)).replace(/</g, "&lt;") + "</pre>"; });</script>
+<div id="toast" class="toast" hidden></div>
+<script>
+/* 빠른 화면: 화면은 여기서 바로 뜨고, 데이터만 구글 서버에서 받아 와요 */
+var AK = "edu", EK = "eunbit.tokens", API_URL = "https://script.google.com/macros/s/AKfycbwWplTIDGou6a_Qe9wM7oMIAAknPgLf-0GGtgKJj51bYrrOI44T8libt49dszLiE96q/exec";
+function rpc(fn, args) {
+  return fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ fn: fn, args: args || [] }) })
+    .then(function (r) { return r.json(); })
+    .then(function (j) { if (!j.ok) throw new Error(j.error || "오류가 났어요."); return j.result; });
+}
+function tokAll() { try { return JSON.parse(localStorage.getItem(EK) || "{}") || {}; } catch (e) { return {}; } }
+function tokGet() { return tokAll()[AK] || ""; }
+function tokSet(v) { try { var t = tokAll(); t[AK] = v; if (AK === "edu") t.noedu = ""; localStorage.setItem(EK, JSON.stringify(t)); } catch (e) {} }
+function tokDel() { try { var t = tokAll(); delete t[AK]; localStorage.setItem(EK, JSON.stringify(t)); localStorage.removeItem("swr." + AK); } catch (e) {} }
+function swrGet() { try { var o = JSON.parse(localStorage.getItem("swr." + AK) || "null"); return o && o.t && o.t === tokGet() ? o.d : null; } catch (e) { return null; } }
+function swrSet(d) { try { localStorage.setItem("swr." + AK, JSON.stringify({ t: tokGet(), d: d })); } catch (e) {} }
+// 서버를 미리 깨워 둬요 (첫 요청이 느려지지 않게)
+try { rpc("__ping", []).catch(function () {}); } catch (e) {}
+</script>
+<script>
+// PDF 합치기 도구는 필요할 때만 불러옵니다 (화면이 먼저 뜨도록)
+function loadPdfLib() {
+  if (window.PDFLib) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js";
+    s.onload = res; s.onerror = () => rej(new Error("PDF 도구를 불러오지 못했어요. 인터넷 연결을 확인해 주세요."));
+    document.head.appendChild(s);
+    setTimeout(() => rej(new Error("PDF 도구를 불러오지 못했어요. 다시 눌러 주세요.")), 20000);
+  });
+}
+let MODE = "edu", IS_EDU = true; // 시작할 때 주소의 app 값으로 정해요
+const S = { token: "", boot: null, ov: null, year: "", tab: "status" };
+S.token = tokGet();
+
+
+const $app = document.getElementById("app");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function toast(msg, ms) {
+  const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, ms || 2600);
+}
+function api(fn, ...args) {
+  return rpc(fn, args);
+}
+function errMsg(e) { return String((e && e.message) || e || "").replace(/^Error:\s*/, ""); }
+async function call(fn, ...args) {
+  try { return await api(fn, S.token, ...args); }
+  catch (e) {
+    if (/AUTH/.test(errMsg(e))) { doLogout(true); throw new Error("다시 로그인해 주세요."); }
+    throw e;
+  }
+}
+function doLogout(silent) {
+  const t = S.token; S.token = ""; S.boot = null; S.ov = null;
+  tokDel();
+  if (t && !silent) api("logout", t).catch(() => {});
+  renderLogin();
+}
+
+/* ---------- 로그인 ---------- */
+function renderLogin() {
+  const title = IS_EDU ? "교육" : "이수증";
+  const sub = IS_EDU ? "교육 관리 (담당자 전용)" : "이수증 올리기";
+  $app.innerHTML = `<div class="login"><form class="login-card" id="lf">
+    <h1>${title}</h1><p class="muted">은빛도담어린이집 · ${sub}</p>
+    <input class="code-input" id="code" type="password" autocomplete="off" placeholder="코드" aria-label="코드">
+    <p class="err" id="err"></p>
+    <button class="btn block" id="lb" type="submit">들어가기</button>
+    <p class="muted small">연차달력·일당직표와 같은 내 코드를 써요.</p></form></div>`;
+  document.getElementById("lf").onsubmit = async ev => {
+    ev.preventDefault();
+    const b = document.getElementById("lb"), er = document.getElementById("err");
+    b.disabled = true; er.textContent = "";
+    try {
+      const r = await api("login", document.getElementById("code").value, MODE);
+      S.token = r.token; tokSet(S.token);
+      start();
+    } catch (e) { er.textContent = errMsg(e); b.disabled = false; }
+  };
+}
+
+function start() {
+  $app.innerHTML = `<div class="login"><p class="muted">불러오는 중…</p></div>`;
+  (IS_EDU ? loadEdu() : loadCert()).catch(e => {
+    if (S.token) { $app.innerHTML = `<div class="login"><div class="login-card"><p>${esc(errMsg(e))}</p><button class="btn block" id="rb">다시 시도</button><button class="btn line block" id="lo">나가기</button></div></div>`;
+      document.getElementById("rb").onclick = start; document.getElementById("lo").onclick = () => doLogout(); }
+  });
+}
+
+/* ================= 선생님: 이수증 올리기 ================= */
+async function loadCert() {
+  const c = swrGet();
+  if (c) { S.boot = c; renderCert(); }
+  const b = await call("boot");
+  if (!c || JSON.stringify(b) !== JSON.stringify(c)) { S.boot = b; swrSet(b); renderCert(); }
+}
+function renderCert() {
+  const b = S.boot, n = b.edus.filter(e => e.mine.length).length;
+  $app.innerHTML = `<div class="wrap">
+    <div class="top"><div><div class="who">${esc(b.name)} 선생님</div><div class="muted small">${esc(b.year)}년 이수증 올리기</div></div>
+      <button class="btn line sm" id="lo">나가기</button></div>
+    <div class="prog"><div><b>${n}</b> / ${b.edus.length} 올림</div><div style="flex:1;max-width:46%"><div class="bar"><i style="width:${b.edus.length ? n / b.edus.length * 100 : 0}%"></i></div></div></div>
+    <p class="muted small">${b.edus.length ? "올릴 교육을 눌러 주세요. 사진이나 PDF 모두 돼요." : "지금 올릴 교육이 없어요. 새 교육이 생기면 여기에 보여요."}</p>
+    <div class="list">${b.edus.map(e => `<button class="edu" data-c="${e.code}">
+      <span class="chk ${e.mine.length ? "done" : ""}">${e.mine.length ? "✓" : esc(e.no)}</span>
+      <span><b>${esc(e.name)}</b>${e.note ? `<small>${esc(e.note)}</small>` : ""}${e.mine.length ? `<small style="color:var(--ok)">${e.mine.length}개 올림</small>` : ""}</span><span class="go">›</span></button>`).join("")}</div></div>`;
+  document.getElementById("lo").onclick = () => doLogout();
+  $app.querySelectorAll(".edu").forEach(el => el.onclick = () => openUpload(el.dataset.c));
+}
+
+function b64OfFile(file) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = rej; r.readAsDataURL(file); });
+}
+async function loadImg(file) {
+  if (window.createImageBitmap) { try { return await createImageBitmap(file); } catch (e) {} }
+  return await new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = u; });
+}
+// 사진은 JPG로 줄여서(긴 쪽 2000px) 올려요. PDF는 그대로.
+async function prepFile(file) {
+  const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+  if (isPdf) {
+    if (file.size > 9 * 1024 * 1024) throw new Error(file.name + " — PDF가 너무 커요 (9MB 이하)");
+    return { mime: "application/pdf", b64: await b64OfFile(file), name: file.name };
+  }
+  const im = await loadImg(file);
+  const w0 = im.width || im.naturalWidth, h0 = im.height || im.naturalHeight, k = Math.min(1, 2000 / Math.max(w0, h0));
+  const c = document.createElement("canvas"); c.width = Math.round(w0 * k); c.height = Math.round(h0 * k);
+  const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+  return { mime: "image/jpeg", b64: c.toDataURL("image/jpeg", 0.85).split(",")[1], name: file.name };
+}
+
+function today() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function openUpload(code) {
+  const e = S.boot.edus.find(x => x.code === code);
+  let picked = [];
+  const bg = document.createElement("div"); bg.className = "sheet-bg";
+  bg.innerHTML = `<div class="sheet" role="dialog" aria-label="${esc(e.name)}">
+    <div class="top"><h2>${esc(e.name)}</h2><button class="btn line sm" id="cl">닫기</button></div>
+    ${e.note ? `<p class="muted small">${esc(e.note)}</p>` : ""}
+    <div id="mine"></div>
+    ${e.needMemo ? `<input type="text" id="memo" maxlength="80" placeholder="교육 이름 (꼭 적어 주세요)">` : ""}
+    <label class="small muted" for="dd">이수한 날짜 (이수증에 적힌 날짜)</label>
+    <input type="date" id="dd" max="${today()}" value="${today()}" style="width:100%;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:10px 12px">
+    <label class="pick" for="fi">+ 사진 / PDF 고르기</label>
+    <input id="fi" type="file" accept="application/pdf,image/*" multiple hidden>
+    <div id="picked" class="list"></div>
+    <button class="btn block" id="go" disabled>올리기</button>
+    <button class="btn line block" id="st">누가 올렸는지 보기 (O / X)</button></div>`;
+  document.body.appendChild(bg);
+  const close = () => bg.remove();
+  bg.querySelector("#cl").onclick = close;
+  bg.onclick = ev => { if (ev.target === bg) close(); };
+  bg.querySelector("#st").onclick = () => openStatus(code);
+  const $go = bg.querySelector("#go");
+  function paintMine() {
+    bg.querySelector("#mine").innerHTML = e.mine.length ? `<div class="card"><b class="small">이미 올린 것</b>${e.mine.map(m => `<div class="file" style="margin-top:6px"><span>${esc(m.memo ? m.memo + " · " : "")}이수 ${esc(m.done || "?")} · 올림 ${esc(m.at.slice(5, 10))}</span><button class="x" data-d="${m.id}" aria-label="지우기">🗑</button></div>`).join("")}</div>` : "";
+    bg.querySelectorAll("[data-d]").forEach(x => x.onclick = async () => {
+      if (!confirm("이 파일을 지울까요?")) return;
+      try { await call("deleteMine", x.dataset.d); e.mine = e.mine.filter(m => m.id !== x.dataset.d); paintMine(); renderCert(); toast("지웠어요"); }
+      catch (er) { toast(errMsg(er)); }
+    });
+  }
+  function paintPicked() {
+    bg.querySelector("#picked").innerHTML = picked.map((f, i) => `<div class="file"><span>${esc(f.name)}</span><button class="x" data-i="${i}" aria-label="빼기">✕</button></div>`).join("");
+    bg.querySelectorAll("[data-i]").forEach(x => x.onclick = () => { picked.splice(Number(x.dataset.i), 1); paintPicked(); });
+    $go.disabled = !picked.length;
+  }
+  paintMine(); paintPicked();
+  bg.querySelector("#fi").onchange = ev => { picked = picked.concat(Array.from(ev.target.files)); ev.target.value = ""; paintPicked(); };
+  $go.onclick = async () => {
+    const memoEl = bg.querySelector("#memo"), memo = memoEl ? memoEl.value.trim() : "";
+    if (e.needMemo && !memo) { toast("교육 이름을 적어 주세요"); memoEl.focus(); return; }
+    const dd = bg.querySelector("#dd").value;
+    if (!dd) { toast("이수한 날짜를 골라 주세요"); return; }
+    $go.disabled = true;
+    try {
+      for (let i = 0; i < picked.length; i++) {
+        $go.textContent = `올리는 중… ${i + 1}/${picked.length}`;
+        const p = await prepFile(picked[i]);
+        const r = await call("upload", code, p.mime, p.b64, memo, dd);
+        e.mine.push({ id: r.id, fileName: r.fileName, at: r.at, memo: memo, done: dd });
+      }
+      renderCert(); close(); toast("올렸어요 ✓ 고마워요!"); openStatus(code);
+    } catch (er) { toast(errMsg(er), 4200); $go.textContent = "올리기"; $go.disabled = false; }
+  };
+}
+
+async function openStatus(code) {
+  const bg = document.createElement("div"); bg.className = "sheet-bg"; bg.style.zIndex = 30;
+  bg.innerHTML = `<div class="sheet"><p class="muted">불러오는 중…</p></div>`; document.body.appendChild(bg);
+  const close = () => bg.remove(); bg.onclick = ev => { if (ev.target === bg) close(); };
+  let d;
+  try { d = await call("eduStatus", code); } catch (e) { toast(errMsg(e)); close(); return; }
+  const no = d.list.filter(x => !x.done);
+  bg.querySelector(".sheet").innerHTML = `<div class="top"><h2>${esc(d.name)}</h2><button class="btn line sm" id="c3">닫기</button></div>
+    <p class="muted small">${d.done}/${d.list.length}명 올림 · 올린 선생님은 O, 아직이면 X</p>
+    <div>${d.list.map(x => `<div class="row"><span class="pill ${x.done ? "ok" : "no"}" style="min-width:34px;text-align:center">${x.done ? "O" : "X"}</span><b style="flex:1;font-weight:${x.me ? 700 : 500}">${esc(x.name)}${x.me ? " (나)" : ""}</b></div>`).join("")}</div>
+    <p class="small" style="color:var(--bad)">${no.length ? "아직 안 올린 선생님: " + esc(no.map(x => x.name).join(", ")) : "모두 올렸어요 🎉"}</p>`;
+  bg.querySelector("#c3").onclick = close;
+}
+
+/* ================= 교육 관리 (이슬 전용) ================= */
+async function loadEdu(year) {
+  const c = year ? null : swrGet();
+  if (c) { S.ov = c; S.year = c.year; renderEdu(); }
+  const o = await call("adminOverview", year || S.year || "");
+  if (!c || JSON.stringify(o) !== JSON.stringify(c)) { S.ov = o; S.year = o.year; if (!year) swrSet(o); renderEdu(); }
+}
+function renderEdu() {
+  const o = S.ov;
+  $app.innerHTML = `<div class="wrap">
+    <div class="top"><div class="who">교육 관리</div>
+      <div style="display:flex;gap:8px;align-items:center"><select id="yr" style="width:auto">${o.years.map(y => `<option ${y === o.year ? "selected" : ""}>${y}</option>`).join("")}</select>
+      <button class="btn line sm" id="lo">나가기</button></div></div>
+    <button class="btn block" id="add">＋ 교육 추가</button>
+    <div id="body"></div></div>`;
+  document.getElementById("lo").onclick = () => doLogout();
+  document.getElementById("yr").onchange = ev => loadEdu(ev.target.value).catch(e => toast(errMsg(e)));
+  document.getElementById("add").onclick = () => openEduForm(null);
+  renderStatus();
+}
+function renderStatus() {
+  const o = S.ov;
+  document.getElementById("body").innerHTML = o.edus.length ? `<div class="list">${o.edus.map(e => {
+    const pct = e.total ? e.done / e.total * 100 : 0, full = e.total && e.done === e.total;
+    return `<button class="edu" data-c="${e.code}"><span class="chk ${full ? "done" : ""}">${full ? "✓" : esc(e.no)}</span>
+      <span style="flex:1;min-width:0"><b>${esc(e.name)}</b><small>${e.closed ? "올리기 끝남 · " : ""}${e.limit ? "지정 " + esc(e.who.join(", ") || "(없음)") : "전원"} · ${e.done}/${e.total}명</small>
+      <div class="bar" style="margin-top:6px"><i style="width:${pct}%"></i></div></span><span class="go">›</span></button>`;
+  }).join("")}</div>` : `<p class="muted" style="text-align:center;padding:30px 0">아직 교육이 없어요.<br>위의 "＋ 교육 추가"로 만들어 주세요.</p>`;
+  $app.querySelectorAll(".edu").forEach(el => el.onclick = () => openDetail(el.dataset.c));
+}
+
+// 교육 추가 / 고치기 (e 가 null 이면 새 교육)
+function openEduForm(e) {
+  const isNew = !e;
+  const v = e ? { code: e.code, name: e.name, note: e.note, needMemo: e.needMemo, limit: e.limit, who: e.who.slice(), closed: e.closed }
+              : { code: "", name: "", note: "", needMemo: false, limit: false, who: [], closed: false };
+  const bg = document.createElement("div"); bg.className = "sheet-bg"; bg.style.zIndex = 30;
+  bg.innerHTML = `<div class="sheet"><div class="top"><h2>${isNew ? "교육 추가" : "교육 설정"}</h2><button class="btn line sm" id="cl">닫기</button></div>
+    <input type="text" id="nm" maxlength="80" placeholder="교육 이름 (예: 2026 보육교직원 안전교육)">
+    <input type="text" id="nt" maxlength="120" placeholder="설명 (선택)">
+    <div class="seg"><button data-l="0">전원</button><button data-l="1">지정한 선생님만</button></div>
+    <div class="chips" id="chips">${S.ov.staff.map(n => `<button class="chip" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+    <label class="small"><input type="checkbox" id="nmemo"> 올릴 때 교육 이름을 적게 하기</label>
+    ${isNew ? "" : `<label class="small"><input type="checkbox" id="cls"> 올리기 끝내기 (선생님 화면에서 숨겨요. 자료는 그대로 남아요)</label>`}
+    <button class="btn block" id="sv">${isNew ? "추가하기" : "저장"}</button>
+    ${isNew ? "" : `<button class="btn bad block" id="dl2">이 교육 지우기</button>`}</div>`;
+  document.body.appendChild(bg);
+  const close = () => bg.remove(); bg.onclick = ev => { if (ev.target === bg) close(); };
+  bg.querySelector("#cl").onclick = close;
+  bg.querySelector("#nm").value = v.name; bg.querySelector("#nt").value = v.note; bg.querySelector("#nmemo").checked = v.needMemo;
+  if (!isNew) bg.querySelector("#cls").checked = v.closed;
+  const chips = bg.querySelector("#chips");
+  function paint() {
+    bg.querySelectorAll("[data-l]").forEach(b => b.classList.toggle("on", (b.dataset.l === "1") === v.limit));
+    chips.hidden = !v.limit;
+    bg.querySelectorAll("[data-n]").forEach(c => c.classList.toggle("on", v.who.indexOf(c.dataset.n) >= 0));
+  }
+  bg.querySelectorAll("[data-l]").forEach(b => b.onclick = () => { v.limit = b.dataset.l === "1"; paint(); });
+  bg.querySelectorAll("[data-n]").forEach(c => c.onclick = () => { const i = v.who.indexOf(c.dataset.n); if (i >= 0) v.who.splice(i, 1); else v.who.push(c.dataset.n); paint(); });
+  paint();
+  bg.querySelector("#sv").onclick = async ev => {
+    const name = bg.querySelector("#nm").value.trim(), note = bg.querySelector("#nt").value, nmemo = bg.querySelector("#nmemo").checked;
+    if (!name) { toast("교육 이름을 적어 주세요"); return; }
+    if (v.limit && !v.who.length) { toast("지정할 선생님을 골라 주세요"); return; }
+    ev.target.disabled = true;
+    try {
+      if (isNew) await call("adminAddEdu", name, note, nmemo, v.limit, v.who);
+      else await call("adminUpdateEdu", v.code, name, note, nmemo, v.limit, v.who, bg.querySelector("#cls").checked);
+      close(); toast("저장했어요 ✓"); await loadEdu();
+    } catch (er) { toast(errMsg(er), 4200); ev.target.disabled = false; }
+  };
+  if (!isNew) bg.querySelector("#dl2").onclick = async () => {
+    if (!confirm("이 교육을 지울까요?")) return;
+    try { await call("adminDeleteEdu", v.code); close(); toast("지웠어요"); await loadEdu(); } catch (er) { toast(errMsg(er), 4200); }
+  };
+}
+
+function bytesOfB64(b64) { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+
+async function openDetail(code) {
+  const bg = document.createElement("div"); bg.className = "sheet-bg";
+  bg.innerHTML = `<div class="sheet"><p class="muted">불러오는 중…</p></div>`; document.body.appendChild(bg);
+  const close = () => bg.remove(); bg.onclick = ev => { if (ev.target === bg) close(); };
+  let d;
+  try { d = await call("adminDetail", S.year, code); } catch (e) { toast(errMsg(e)); close(); return; }
+  const sh = bg.querySelector(".sheet");
+  const missing = () => d.staff.filter(s => !s.files.length).map(s => s.name);
+  function paint() {
+    const have = d.staff.length - missing().length;
+    sh.innerHTML = `<div class="top"><h2>${esc(d.name)}</h2><div style="display:flex;gap:6px"><button class="btn line sm" id="gs">설정</button><button class="btn line sm" id="cl">닫기</button></div></div>
+      <p class="muted small">${esc(d.year)}년 · ${have}/${d.staff.length}명 올림 (PDF는 이 순서대로 합쳐져요)</p>
+      <div>${d.staff.map(s => `<div class="row"><span class="pill ${s.files.length ? "ok" : "no"}">${s.files.length ? "✓" : "—"}</span><div style="flex:1;min-width:0"><b style="font-weight:500">${esc(s.name)}</b>${s.files.map(f => `<div class="small muted">이수 ${esc(f.done || "?")} · 올림 ${esc(f.at.slice(0, 10))} <a href="#" data-dt="${f.id}">날짜 고치기</a></div>`).join("")}</div>
+        <label class="btn line sm" style="cursor:pointer">대신 올리기<input type="file" accept="application/pdf,image/*" multiple hidden data-u="${s.id}"></label>${s.files.map((f, i) => `<button class="btn line sm" data-v="${f.id}">보기${s.files.length > 1 ? i + 1 : ""}</button><button class="x" data-x="${f.id}" aria-label="지우기">🗑</button>`).join("")}</div>`).join("")}</div>
+      <div id="msg"></div>
+      <button class="btn block" id="mg" ${have ? "" : "disabled"}>전교사 PDF 한 개로 합치기</button>
+      <button class="btn line block" id="cp" ${missing().length ? "" : "hidden"}>안 낸 선생님 이름 복사 (${missing().length}명)</button>`;
+    sh.querySelector("#cl").onclick = close;
+    sh.querySelector("#gs").onclick = () => { const ee = S.ov.edus.find(x => x.code === code); if (ee) openEduForm(ee); };
+    sh.querySelectorAll("[data-dt]").forEach(a => a.onclick = async ev => {
+      ev.preventDefault();
+      const f = d.staff.reduce((x, st) => x || st.files.find(q => q.id === a.dataset.dt), null);
+      const nd = prompt("이수한 날짜 (예: 2026-11-05)", f && f.done ? f.done : today());
+      if (!nd) return;
+      try { const r = await call("adminSetDate", a.dataset.dt, nd.trim()); f.done = r.done; f.fileName = r.fileName; paint(); toast("고쳤어요 ✓"); }
+      catch (er) { toast(errMsg(er), 4200); }
+    });
+    sh.querySelectorAll("[data-v]").forEach(b => b.onclick = () => viewFile(b.dataset.v));
+    sh.querySelectorAll("[data-u]").forEach(inp => inp.onchange = async ev => {
+      const t = d.staff.find(x => x.id === inp.dataset.u), fl = Array.from(ev.target.files);
+      if (!t || !fl.length) return;
+      const dd = prompt(t.name + " 선생님 이수증에 적힌 이수 날짜 (예: 2026-11-05)", today());
+      if (!dd) { ev.target.value = ""; return; }
+      try {
+        for (let i = 0; i < fl.length; i++) {
+          toast("올리는 중… " + (i + 1) + "/" + fl.length, 20000);
+          const p = await prepFile(fl[i]);
+          const r = await call("adminUploadFor", code, t.id, p.mime, p.b64, "", dd.trim());
+          t.files.push({ id: r.id, fileName: r.fileName, mime: p.mime, at: r.at, memo: "", done: dd.trim() });
+        }
+        toast("올렸어요 ✓"); paint(); loadEdu().catch(() => {});
+      } catch (er) { toast(errMsg(er), 4200); }
+    });
+    sh.querySelectorAll("[data-x]").forEach(b => b.onclick = async () => {
+      if (!confirm("이 이수증을 지울까요? (되돌릴 수 없어요)")) return;
+      try { await call("adminDelete", b.dataset.x); d.staff.forEach(s => s.files = s.files.filter(f => f.id !== b.dataset.x)); paint(); loadEdu().catch(() => {}); }
+      catch (e) { toast(errMsg(e)); }
+    });
+    sh.querySelector("#cp").onclick = async () => {
+      const text = `[${d.name}] 이수증 제출 부탁드려요: ${missing().join(", ")}`;
+      try { await navigator.clipboard.writeText(text); toast("복사했어요 — 카톡에 붙여 넣으세요"); } catch (e) { prompt("복사해서 쓰세요", text); }
+    };
+    sh.querySelector("#mg").onclick = () => mergeAll(d, sh.querySelector("#msg"), sh.querySelector("#mg"));
+  }
+  paint();
+}
+
+async function viewFile(id) {
+  toast("파일 가져오는 중…", 8000);
+  try {
+    const f = await call("adminFile", id);
+    const url = URL.createObjectURL(new Blob([bytesOfB64(f.b64)], { type: f.mime }));
+    document.getElementById("toast").hidden = true;
+    const bg = document.createElement("div"); bg.className = "sheet-bg"; bg.style.zIndex = 30;
+    bg.innerHTML = `<div class="sheet"><div class="top"><b class="small">${esc(f.name)}</b><button class="btn line sm" id="c2">닫기</button></div>
+      ${f.mime.indexOf("image") === 0 ? `<img src="${url}" alt="" style="width:100%;border-radius:12px">` : ""}
+      <a class="btn dl" href="${url}" target="_blank" rel="noopener" download="${esc(f.name)}">열기 / 저장</a></div>`;
+    document.body.appendChild(bg);
+    bg.querySelector("#c2").onclick = () => bg.remove(); bg.onclick = ev => { if (ev.target === bg) bg.remove(); };
+  } catch (e) { toast(errMsg(e)); }
+}
+
+async function mergeAll(d, msgEl, btn) {
+  btn.disabled = true; msgEl.innerHTML = "";
+  const say = t => msgEl.innerHTML = `<div class="note">${esc(t)}</div>`;
+  const failed = [];
+  try {
+    say("PDF 도구 준비 중…");
+    await loadPdfLib();
+    const { PDFDocument } = PDFLib, out = await PDFDocument.create();
+    const files = []; d.staff.forEach(s => s.files.forEach(f => files.push({ who: s.name, f: f })));
+    for (let i = 0; i < files.length; i++) {
+      const { who, f } = files[i];
+      say(`합치는 중… ${i + 1}/${files.length} (${who})`);
+      try {
+        const r = await call("adminFile", f.id), bytes = bytesOfB64(r.b64);
+        if (r.mime === "application/pdf") {
+          const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
+          (await out.copyPages(src, src.getPageIndices())).forEach(p => out.addPage(p));
+        } else {
+          const img = r.mime === "image/png" ? await out.embedPng(bytes) : await out.embedJpg(bytes);
+          const PW = 595.28, PH = 841.89, M = 28, sc = Math.min((PW - 2 * M) / img.width, (PH - 2 * M) / img.height);
+          const w = img.width * sc, h = img.height * sc, page = out.addPage([PW, PH]);
+          page.drawImage(img, { x: (PW - w) / 2, y: (PH - h) / 2, width: w, height: h });
+        }
+      } catch (e) { failed.push(who + " (" + f.fileName + ")"); }
+    }
+    if (!out.getPageCount()) throw new Error("합칠 이수증이 없어요.");
+    say("PDF 만드는 중…");
+    const blob = new Blob([await out.save()], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob), name = `${d.year}_${d.name}_전교사.pdf`.replace(/[\\/:*?"<>|]/g, " ");
+    const miss = d.staff.filter(s => !s.files.length).map(s => s.name);
+    msgEl.innerHTML = `<div class="note" style="background:var(--ok-soft);color:var(--ok)">완성! ${out.getPageCount()}쪽
+      ${miss.length ? `<br>안 낸 선생님: ${esc(miss.join(", "))}` : ""}${failed.length ? `<br>합치지 못한 파일: ${esc(failed.join(", "))}` : ""}</div>
+      <a class="btn dl" id="dl" href="${url}" download="${esc(name)}" target="_blank" rel="noopener" style="margin-top:8px">PDF 내려받기</a>`;
+    try { document.getElementById("dl").click(); } catch (e) {}
+  } catch (e) { say(errMsg(e)); }
+  btn.disabled = false;
+}
+
+/* ---------- 시작 ---------- */
+if (S.token) start(); else renderLogin();
+</script>
+</body>
+</html>
