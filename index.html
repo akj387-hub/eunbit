@@ -118,8 +118,9 @@ function render() {
   Array.prototype.forEach.call(document.querySelectorAll("button.tile"), function (b) { b.onclick = function () { openApp(b.getAttribute("data-k")); }; });
   var inn = loggedIn();
   $("lf").hidden = inn;
+  $("grid").hidden = !inn;
   $("lo").hidden = !inn;
-  $("hint").textContent = inn ? "아이콘을 눌러 들어가요" : "코드를 넣으면 아이콘이 열려요";
+  $("hint").textContent = inn ? "아이콘을 눌러 들어가요" : "";
 }
 function openApp(key) {
   var a = APPS.filter(function (x) { return x.key === key; })[0];
