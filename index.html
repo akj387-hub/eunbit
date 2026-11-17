@@ -113,7 +113,7 @@ function loggedIn() { return APPS.some(function (a) { return T[a.key]; }); }
 function render() {
   $("grid").innerHTML = APPS.map(function (a) {
     var off = a.adminOnly && T.noedu;
-    return '<button class="tile' + (off ? " off" : "") + '" data-k="' + a.key + '"><img src="' + a.icon + '" alt=""><span>' + a.name + '</span>' + (off ? '<span class="note">담당자 전용</span>' : "") + '</button>';
+    return '<button class="tile' + (off ? " off" : "") + '" data-k="' + a.key + '"><img src="' + a.icon + '" alt=""><span>' + a.name + '</span>' + (a.adminOnly ? '<span class="note">담당자 전용</span>' : "") + '</button>';
   }).join("");
   Array.prototype.forEach.call(document.querySelectorAll("button.tile"), function (b) { b.onclick = function () { openApp(b.getAttribute("data-k")); }; });
   var inn = loggedIn();
