@@ -54,7 +54,22 @@
   a.tile:active{transform:scale(.96);box-shadow:0 4px 12px rgba(110,100,180,.18)}
   a.tile img{width:84px;height:84px;border-radius:22px;box-shadow:0 6px 14px rgba(80,70,140,.22)}
   a.tile span{font-family:var(--f-title);font-size:1.18rem;letter-spacing:.01em;text-align:center;line-height:1.25}
-  footer{text-align:center;color:var(--muted);font-size:.85rem}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;display:grid;gap:6px;justify-items:center}
+  .login{background:var(--card);border:1.5px solid var(--line);border-radius:28px;padding:20px 18px;box-shadow:var(--shadow);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:grid;gap:12px;text-align:center}
+  .login p{margin:0;font-family:var(--f-title);font-size:1.12rem}
+  .login small{color:var(--muted);font-size:.88rem}
+  .login input{width:100%;font:inherit;font-size:1.5rem;letter-spacing:.35em;text-align:center;padding:12px;border-radius:16px;border:2px solid rgba(160,150,220,.45);background:rgba(255,255,255,.85);color:#3a3560}
+  .login input:focus{outline:0;border-color:#8c7be0}
+  .btn{font-family:var(--f-title);font-size:1.15rem;border:0;border-radius:18px;padding:13px;color:#fff;background:linear-gradient(90deg,#6b8fe0,#a07be0);box-shadow:0 6px 16px rgba(120,100,210,.35)}
+  .btn:active{transform:scale(.97)}
+  .btn:disabled{opacity:.55}
+  .err{color:#d94a6a;min-height:1.3em;font-size:.92rem}
+  button.tile{font:inherit;cursor:pointer}
+  .tile.off{opacity:.5}
+  .tile .note{font-family:var(--f-body);font-size:.78rem;color:var(--muted);margin-top:-6px}
+  .link{background:none;border:0;color:var(--muted);font:inherit;font-size:.88rem;text-decoration:underline;cursor:pointer}
+  .toastbar{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:rgba(50,45,90,.92);color:#fff;padding:11px 18px;border-radius:99px;font-size:.95rem;z-index:9}
+
 </style>
 </head>
 <body>
@@ -64,13 +79,79 @@
     <h1>은빛도담어린이집</h1>
     <p class="sub">오늘도 도담도담 ✨</p>
   </header>
-  <nav class="grid" aria-label="바로가기">
-    <a class="tile" href="duty/"><img src="duty/icon-192.png" alt=""><span>일당직표</span></a>
-    <a class="tile" href="leave/"><img src="leave/icon-192.png" alt=""><span>연차달력</span></a>
-    <a class="tile" href="edu/"><img src="edu/icon-192.png" alt=""><span>교사교육관리</span></a>
-    <a class="tile" href="cert/"><img src="cert/icon-192.png" alt=""><span>이수증올리기</span></a>
-  </nav>
-  <footer>아이콘을 눌러 들어가요</footer>
-</main>
+  <form class="login" id="lf" hidden>
+    <p>내 코드를 한 번만 넣어 주세요</p>
+    <input id="code" type="password" autocomplete="off" placeholder="코드" aria-label="코드">
+    <div class="err" id="err"></div>
+    <button class="btn" id="lb" type="submit">들어가기</button>
+    <small>한 번 들어오면 네 가지 앱이 로그인 없이 열려요.</small>
+  </form>
+  <nav class="grid" id="grid" aria-label="바로가기"></nav>
+  <footer><span id="hint">아이콘을 눌러 들어가요</span><button class="link" id="lo" hidden>다른 사람으로 로그인</button></footer>
+  </main>
+<div class="toastbar" id="toast" hidden></div>
+<script>
+// 앱 주소 (일당직표·연차달력·교육·이수증)
+var APPS = [
+  { key: "duty",  name: "일당직표",     icon: "duty/icon-192.png",  url: "https://script.google.com/macros/s/AKfycbyLwTOljK2JUnr6kCtCx1Vi-WOkoz2E-HG4BhuVwSmcsAPcwgqGjHGwe-2tc4jJdNPM0g/exec" },
+  { key: "leave", name: "연차달력",     icon: "leave/icon-192.png", url: "https://script.google.com/macros/s/AKfycbz7ZXxbS_XMkyUFAIKmiibvEItlnHrmnhFNDqQn0z8viSVJVs_iXw4QLy9mwAGa7Sfz/exec" },
+  { key: "edu",   name: "교사교육관리", icon: "edu/icon-192.png",   url: "https://script.google.com/macros/s/AKfycbwWplTIDGou6a_Qe9wM7oMIAAknPgLf-0GGtgKJj51bYrrOI44T8libt49dszLiE96q/exec", q: "app=edu", adminOnly: true },
+  { key: "cert",  name: "이수증올리기", icon: "cert/icon-192.png",  url: "https://script.google.com/macros/s/AKfycbwWplTIDGou6a_Qe9wM7oMIAAknPgLf-0GGtgKJj51bYrrOI44T8libt49dszLiE96q/exec" }
+];
+var KEY = "eunbit.tokens";
+var T = {};
+try { T = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { T = {}; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(T)); } catch (e) {} }
+function $(id) { return document.getElementById(id); }
+function toast(m) { var t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 2600); }
+function call(app, params) {
+  var u = app.url + "?" + (app.q ? app.q + "&" : "") + Object.keys(params).map(function (k) { return k + "=" + encodeURIComponent(params[k]); }).join("&");
+  return fetch(u).then(function (r) { return r.json(); });
+}
+function loggedIn() { return APPS.some(function (a) { return T[a.key]; }); }
+function render() {
+  $("grid").innerHTML = APPS.map(function (a) {
+    var off = a.adminOnly && T.noedu;
+    return '<button class="tile' + (off ? " off" : "") + '" data-k="' + a.key + '"><img src="' + a.icon + '" alt=""><span>' + a.name + '</span>' + (off ? '<span class="note">담당자 전용</span>' : "") + '</button>';
+  }).join("");
+  Array.prototype.forEach.call(document.querySelectorAll("button.tile"), function (b) { b.onclick = function () { openApp(b.getAttribute("data-k")); }; });
+  var inn = loggedIn();
+  $("lf").hidden = inn;
+  $("lo").hidden = !inn;
+  $("hint").textContent = inn ? "아이콘을 눌러 들어가요" : "코드를 넣으면 아이콘이 열려요";
+}
+function openApp(key) {
+  var a = APPS.filter(function (x) { return x.key === key; })[0];
+  if (!loggedIn()) { toast("먼저 코드를 넣어 주세요"); $("code").focus(); return; }
+  if (a.adminOnly && T.noedu) { toast("교육 관리는 담당자만 들어갈 수 있어요"); return; }
+  var base = a.url + (a.q ? "?" + a.q : "");
+  var go = function (ticket) { location.href = a.url + "?" + (a.q ? a.q + "&" : "") + "t=" + encodeURIComponent(ticket); };
+  if (!T[key]) { location.href = base; return; }
+  toast("열고 있어요…");
+  call(a, { api: "ticket", token: T[key] }).then(function (r) {
+    if (r && r.ok) go(r.ticket);
+    else if (r && /AUTH/.test(r.error || "")) { delete T[key]; save(); toast("한 번 더 로그인해 주세요"); T = {}; save(); render(); }
+    else location.href = base;
+  }).catch(function () { location.href = base; });
+}
+$("lf").onsubmit = function (ev) {
+  ev.preventDefault();
+  var code = $("code").value.trim(), b = $("lb"), er = $("err");
+  if (code.length < 4) { er.textContent = "코드를 확인해 주세요."; return; }
+  b.disabled = true; b.textContent = "확인 중…"; er.textContent = "";
+  Promise.all(APPS.map(function (a) {
+    return call(a, { api: "session", code: code }).catch(function () { return { ok: false, error: "network" }; });
+  })).then(function (rs) {
+    var nt = {}, msg = "";
+    rs.forEach(function (r, i) { if (r && r.ok) nt[APPS[i].key] = r.token; else if (r && !msg) msg = r.error || ""; });
+    var core = ["duty", "leave", "cert"].some(function (k) { return nt[k]; });
+    if (!core) { er.textContent = /network/.test(msg) ? "연결이 안 돼요. 잠시 뒤 다시 해 주세요." : (msg || "코드가 맞지 않아요."); return; }
+    nt.noedu = nt.edu ? "" : "1";
+    T = nt; save(); $("code").value = ""; render();
+  }).then(function () { b.disabled = false; b.textContent = "들어가기"; });
+};
+$("lo").onclick = function () { if (confirm("로그아웃할까요? 4개 앱 모두 다시 코드를 넣어야 해요.")) { T = {}; save(); render(); } };
+render();
+</script>
 </body>
 </html>
