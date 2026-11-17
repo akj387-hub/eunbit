@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>은빛도담 연차달력</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 라벤더 구름: 연보라 하늘, 둥근 흰 카드, 보라 젤리 버튼. 제목 주아체 · 본문 본고딕(Noto Sans KR). 일당직표(살구)와 짝 */
+:root{
+  --bg:#f6f3ff; --sky:#ece5ff; --paper:#ffffff; --ink:#37334a; --muted:#948eaa; --line:#e7e1fa; --soft:#f1edff;
+  --accent:#8f7cf0; --accent-dk:#715dd6; --accent-ink:#ffffff; --accent-soft:#ece6ff;
+  --event:#3f86c9; --event-soft:#e6f4ff;
+  --warn:#b87400; --warn-soft:#fff3c4; --bad:#ef6f8e; --bad-dk:#d1506f; --bad-soft:#ffeef4; --ok:#3f9a5a; --ok-soft:#e3f6e8;
+  --weekend:#f8f6ff; --sun:#ef6f8e; --sat:#6f86d6; --shadow:0 2px 0 var(--line),0 8px 22px rgba(143,124,240,.10);
+  /* 반 색 (일당직표와 같은 색, 나무반은 파랑) */
+  --c-tree:#4f86c6; --c-sprout:#5f9a2a; --c-flower:#b45aa6; --c-pretty:#c98a00; --c-blue:#275317; --c-ext:#9a6a45; --c-none:#948eaa;
+  --f-display:"Jua","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --r:20px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#1d1b26; --sky:#26223a; --paper:#29263a; --ink:#ece9f7; --muted:#a9a3c2; --line:#3a3552; --soft:#2f2b44;
+  --accent:#a798ff; --accent-dk:#7b68e0; --accent-ink:#1b1630; --accent-soft:#3a3360;
+  --event:#8cc4f5; --event-soft:#22324a;
+  --warn:#f1c55c; --warn-soft:#3d331a; --bad:#ff8fa9; --bad-dk:#b9506a; --bad-soft:#41263a; --ok:#86d39b; --ok-soft:#203a28;
+  --weekend:#232031; --sun:#ff8fa9; --sat:#9fb2f0; --shadow:0 2px 0 rgba(0,0,0,.3);
+  --c-tree:#8db8f0; --c-sprout:#a9d97a; --c-flower:#e9a6de; --c-pretty:#ffd166; --c-blue:#8fcf7a; --c-ext:#d9b08f; --c-none:#a9a3c2;
+  color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:linear-gradient(var(--sky) 0,var(--bg) 260px) no-repeat,var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px;position:relative}
+.clouds{position:absolute;inset:0 0 auto 0;height:120px;pointer-events:none;overflow:hidden;z-index:0}
+.wrap > :not(.clouds){position:relative;z-index:1}
+.clouds i{position:absolute;background:var(--paper);border-radius:99px;opacity:.75}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;margin:0;text-wrap:balance}
+h1{font-size:1.75rem;line-height:1.15}
+h2{font-size:1.3rem}
+h3{font-size:1.1rem}
+p{margin:0}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent-soft);outline-offset:2px}
+.eyebrow{font-size:.8rem;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+svg{display:block;flex:none}
+
+/* 로그인 */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px 16px;background:linear-gradient(var(--sky),var(--bg))}
+.login-card{width:100%;max-width:380px;background:var(--paper);border-radius:28px;padding:30px 24px;display:grid;gap:16px;box-shadow:var(--shadow);text-align:center}
+.login-card .logo{margin:0 auto}
+.login-card h1{font-size:2.2rem}
+.code-input{width:100%;font-size:1.6rem;letter-spacing:.4em;text-align:center;padding:12px;border-radius:16px;border:2px solid var(--line);background:var(--soft);font-variant-numeric:tabular-nums}
+.code-input:focus{border-color:var(--accent);outline:0}
+.login-card .btn{padding:12px;font-size:1.1rem}
+
+/* 머리 */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;position:relative}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:48px;height:48px;border-radius:16px;background:var(--accent);display:grid;place-items:center;box-shadow:0 3px 0 var(--accent-dk)}
+.hi{font-size:.88rem;color:var(--muted)}
+.me{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.me .who{display:none}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 12px;border-radius:99px;background:var(--accent-soft);color:var(--accent-dk);font-family:var(--f-display);font-size:.9rem}
+select,input[type=text],input[type=number],input[type=date],input[type=month],textarea{background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:7px 10px;min-width:0}
+select:focus,input:focus,textarea:focus{border-color:var(--accent);outline:0}
+textarea{width:100%;min-height:80px;resize:vertical}
+
+/* 남은 연차 */
+.balance{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:24px;background:var(--paper);box-shadow:var(--shadow)}
+.ring{--p:0%;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent) 0 var(--p),var(--soft) var(--p) 100%);flex:none}
+.ring.neg{background:conic-gradient(var(--bad) 0 100%)}
+.ring span{width:58px;height:58px;border-radius:50%;background:var(--paper);display:grid;place-items:center;align-content:center;font-family:var(--f-display);font-size:1.25rem;line-height:1}
+.ring small{display:block;font-family:var(--f-body);font-size:.6rem;color:var(--muted);margin-top:2px}
+.balance .big{font-family:var(--f-display);font-size:1.15rem;display:block}
+.balance .big.neg{color:var(--bad)}
+.balance .sub{font-size:.8rem;color:var(--muted);line-height:1.5}
+
+/* 신청 기간 */
+.window{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:12px 16px;border-radius:22px;background:var(--paper);box-shadow:var(--shadow)}
+.window b{font-family:var(--f-display);font-weight:400;font-size:1.1rem}
+.window .when{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.86rem}
+.window.open{background:var(--bad-soft);box-shadow:none}
+.window.closed{background:var(--soft);box-shadow:none}
+.window.before{background:var(--warn-soft);box-shadow:none}
+.window .dday{margin-left:auto;font-family:var(--f-display);font-size:1.12rem;background:var(--paper);color:var(--bad);border-radius:99px;padding:2px 14px;white-space:nowrap}
+.window.urgent .dday{background:var(--bad);color:#fff}
+.window.closed .dday{color:var(--muted)}
+
+/* 판 */
+.board{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+@media (max-width:900px){.board{grid-template-columns:minmax(0,1fr)}}
+.sheet{background:var(--paper);border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0;box-shadow:var(--shadow)}
+.cal-head{display:flex;align-items:center;gap:8px}
+.cal-head h2{flex:1;font-size:1.45rem;font-variant-numeric:tabular-nums;text-align:center}
+.icon-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--line);background:var(--paper);font-size:1.2rem;line-height:1;font-family:var(--f-display);color:var(--muted)}
+.ghost{border:2px solid var(--line);background:var(--paper);border-radius:99px;padding:5px 14px;font-size:.88rem}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:.78rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px;background:var(--soft);border-radius:99px;padding:2px 10px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.sq{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.dow{padding:4px 2px;text-align:center;font-size:.84rem;color:var(--muted);font-family:var(--f-display)}
+.dow.sun{color:var(--sun)} .dow.sat{color:var(--sat)}
+.cell{min-height:104px;border:0;border-radius:14px;background:var(--paper);text-align:left;padding:5px;display:flex;flex-direction:column;gap:3px;min-width:0;box-shadow:0 0 0 1.5px var(--line)}
+.cell.blank{background:transparent;box-shadow:none;cursor:default}
+.cell.closed{background:var(--weekend);box-shadow:none}
+.cell:hover:not(.blank){box-shadow:0 0 0 2px var(--accent-soft)}
+.cell.sel{box-shadow:0 0 0 3px var(--accent)}
+.cell .num{display:flex;align-items:baseline;justify-content:space-between;gap:4px;font-variant-numeric:tabular-nums;font-family:var(--f-display);font-size:.95rem}
+.cell .num .cnt{font-family:var(--f-body);font-size:.68rem;color:var(--muted)}
+.cell .num .cnt.full{color:var(--bad);font-weight:700}
+.cell.sun .d{color:var(--sun)} .cell.sat .d{color:var(--sat)}
+.cell.today .d{background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:0 6px}
+.hol{font-size:.7rem;color:var(--sun);font-family:var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev{font-size:.7rem;padding:1px 6px;border-radius:8px;background:var(--event-soft);color:var(--event);font-family:var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{display:flex;align-items:center;gap:4px;font-size:.76rem;padding:1px 6px;border-radius:8px;background:var(--soft);white-space:nowrap;overflow:hidden;min-width:0}
+.chip.mine{background:var(--accent-soft);font-weight:700}
+.chip .nm{overflow:hidden;text-overflow:ellipsis}
+.chip .sub{margin-left:auto;font-size:.66rem;padding:0 5px;border-radius:6px;flex:none}
+@media (max-width:560px){
+  .cal{gap:3px}
+  .cell{min-height:80px;padding:3px;border-radius:10px}
+  .chip{font-size:.64rem;padding:0 3px;gap:2px}
+  .chip .dot{display:none}
+  .chip .sub{display:none}
+  .hol,.ev{font-size:.58rem;padding:0 3px}
+  .cell .num{font-size:.82rem}
+  .cell .num .cnt{font-size:.56rem}
+}
+.st-none{background:var(--soft);color:var(--muted)}
+.st-req{background:var(--warn-soft);color:var(--warn)}
+.st-ok{background:var(--ok-soft);color:var(--ok)}
+.st-bad{background:var(--bad-soft);color:var(--bad)}
+
+/* 그날 자세히 */
+.day{position:sticky;top:12px}
+@media (max-width:900px){.day{position:static}}
+.day-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.day-head h3{font-size:1.35rem}
+.pill{font-size:.78rem;padding:2px 10px;border-radius:99px;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.event-card{background:var(--event-soft);border-radius:16px;padding:10px 12px;display:grid;gap:4px}
+.event-card .t{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.event-card strong{color:var(--event);font-family:var(--f-display);font-weight:400;font-size:1.05rem}
+.leave{border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 0 0 2px var(--line)}
+.leave-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.leave-top strong{font-family:var(--f-display);font-weight:400;font-size:1.15rem}
+.cls{font-size:.74rem;padding:1px 8px;border-radius:99px;border:1.5px solid currentColor}
+.subbox{background:var(--soft);border-radius:14px;padding:9px 12px;display:grid;gap:6px;font-size:.88rem}
+.subbox .row{display:grid;grid-template-columns:72px minmax(0,1fr);gap:8px;align-items:center}
+.subbox .lbl{color:var(--muted);font-size:.8rem}
+
+/* 젤리 버튼 */
+.btn{font-family:var(--f-display);font-size:1.02rem;background:var(--accent);color:var(--accent-ink);border:0;border-radius:99px;padding:9px 18px;box-shadow:0 3px 0 var(--accent-dk);transition:transform .08s}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--accent-dk)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.line{background:var(--paper);color:var(--accent-dk);box-shadow:inset 0 0 0 2px var(--accent-soft),0 3px 0 var(--line)}
+.btn.event{background:var(--event);color:#fff;box-shadow:0 3px 0 #2d6aa3}
+.btn.danger{background:var(--bad);color:#fff;box-shadow:0 3px 0 var(--bad-dk)}
+.linkbtn{background:none;border:0;color:var(--bad);font-size:.82rem;padding:0;text-decoration:underline}
+.form{display:grid;gap:10px;border-top:2px dashed var(--line);padding-top:12px}
+.field{display:grid;gap:4px}
+.field label{font-size:.84rem;color:var(--muted)}
+.field select,.field input{width:100%}
+.msg{font-size:.88rem;padding:9px 12px;border-radius:14px}
+.msg.bad{background:var(--bad-soft);color:var(--bad)}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}
+.msg.warn{background:var(--warn-soft);color:var(--warn)}
+.msg.event{background:var(--event-soft);color:var(--event)}
+.lock{display:grid;gap:6px;border-top:2px dashed var(--line);padding-top:12px}
+.avail{display:flex;flex-direction:column;gap:4px;font-size:.84rem}
+.avail ul{list-style:none;margin:0;padding:0;display:grid;gap:3px}
+.avail li{display:flex;gap:6px;align-items:baseline}
+.check{display:flex;align-items:center;gap:6px;font-size:.88rem}
+
+/* 연차 목록 표 */
+.tbl-wrap{overflow-x:auto;border-radius:18px;background:var(--paper);box-shadow:0 0 0 2px var(--line)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:.88rem}
+th,td{padding:9px 10px;border-bottom:1.5px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--soft);font-family:var(--f-display);font-weight:400;font-size:.88rem;color:var(--muted);white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tr[data-date]{cursor:pointer}
+tr[data-date]:hover td{background:var(--soft)}
+.empty{padding:20px;text-align:center;color:var(--muted)}
+
+/* 이렇게 써요 */
+.guide-wrap{display:grid;gap:10px}
+.guide-wrap > h2{margin:0 4px}
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.rule{background:var(--paper);border-radius:20px;padding:14px 10px;display:grid;gap:4px;justify-items:center;text-align:center;align-content:start;box-shadow:var(--shadow)}
+.rule .ic{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;margin-bottom:2px}
+.rule b{font-family:var(--f-display);font-weight:400;font-size:1rem}
+.rule p{color:var(--muted);font-size:.8rem;line-height:1.45;word-break:keep-all}
+@media (max-width:420px){.rule{padding:12px 6px}.rule p{font-size:.74rem}}
+.groups{background:var(--paper);border-radius:22px;padding:14px 16px;box-shadow:var(--shadow);display:grid;gap:10px}
+.groups h3{display:flex;align-items:center;gap:8px}
+.grp{display:flex;flex-wrap:wrap;gap:8px}
+.grp > div{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;background:var(--soft);border-radius:14px;padding:6px 10px;font-size:.86rem}
+.grp b{font-family:var(--f-display);font-weight:400;font-size:.95rem;margin-right:2px}
+.groups .contact{font-size:.84rem;color:var(--muted)}
+
+/* 변경 기록 (일당직표와 같은 모양) */
+.log{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.log li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;padding:9px 12px;border-radius:14px;background:var(--soft);font-size:.88rem}
+.log .when{color:var(--muted);font-variant-numeric:tabular-nums;font-size:.8rem}
+.log .k{display:inline-block;padding:0 8px;border-radius:99px;font-size:.78rem;margin-right:4px;background:var(--paper)}
+.log .k-신청,.log .k-등록{color:var(--ok)} .log .k-취소{color:var(--bad)} .log .k-변경{color:var(--warn)} .log .k-대체교사{color:var(--event)}
+@media (max-width:560px){.log li{grid-template-columns:minmax(0,1fr);gap:0}}
+.chg{display:grid;gap:8px;background:var(--soft);border-radius:12px;padding:10px}
+.runall{font-size:.84rem}
+
+/* 연차달력 인쇄 (관리자) — 11월 연차배치표 모양 */
+#printArea{display:none}
+#printArea{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff;color:#000;font-family:"Malgun Gothic","Noto Sans KR",sans-serif}
+#printArea .ph{display:flex;align-items:flex-end;gap:14px;padding:0 0 8px 6px}
+#printArea .ph .pm{font-family:"Times New Roman",serif;font-size:64px;line-height:.9}
+#printArea .ph .py{font-family:"Times New Roman",serif;font-size:20px;line-height:1.5}
+#printArea table{border-collapse:collapse;width:100%;table-layout:fixed;min-width:0;font-size:11.5px}
+#printArea th{font-family:"Times New Roman",serif;font-weight:400;font-size:20px;background:#fff;color:#000;border-top:1px solid #000;border-bottom:1px solid #000;padding:6px 0;text-align:center;border-left:1px dotted #777}
+#printArea th:first-child,#printArea td:first-child{border-left:0}
+#printArea th.sun,#printArea .d.sun{color:#e00000} #printArea th.sat,#printArea .d.sat{color:#1a3fe0}
+#printArea td{vertical-align:top;border-bottom:1px solid #000;border-left:1px dotted #777;padding:3px 5px;color:#000;line-height:1.45;word-break:keep-all}
+#printArea .d{font-family:"Times New Roman",serif;font-size:20px;line-height:1.1;margin-bottom:2px}
+#printArea .d small{font-family:"Malgun Gothic",sans-serif;font-size:10px;color:#e00000;margin-left:4px}
+#printArea .nm{color:#1a3fe0}
+#printArea .sb{color:#000}
+#printArea .ev{color:#6a3fb0;font-size:10.5px}
+#printArea .muted{color:#999}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{background:#fff!important;color:#000}
+  body > :not(#printArea){display:none!important}
+  #printArea{display:block!important}
+}
+
+.settings{display:grid;gap:14px}
+.inline{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.inline input[type=number]{width:70px}
+.busy{position:fixed;right:16px;bottom:16px;background:var(--accent);color:#fff;padding:6px 16px;border-radius:99px;font-family:var(--f-display);box-shadow:0 3px 0 var(--accent-dk)}
+
+/* 맨 아래 어린이집 이름 (로고 색 느낌, 글씨만) */
+.kname{text-align:center;padding:18px 0 4px;font-family:"Gowun Dodum","Noto Sans KR",sans-serif;font-size:1.05rem;letter-spacing:.06em;color:var(--muted)}
+.kname::before{content:"";display:block;width:64px;margin:0 auto 14px;border-top:2px dotted var(--line)}
+.kname .g{color:#5fae3a} .kname .o{color:#f08c3a}
+@media (prefers-color-scheme: dark){.kname .g{color:#9bd67a} .kname .o{color:#ffb070}}
+@media (prefers-reduced-motion:no-preference){.cell{transition:box-shadow .15s}}
+</style>
+</head>
+<body>
+
+<section class="login" id="loginView" hidden>
+  <form class="login-card" id="loginForm">
+    <div class="logo" style="width:68px;height:68px;border-radius:22px"><svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 8a5 5 0 10-1 9.9A6 6 0 1117 8z" fill="#fff"/><circle cx="18" cy="6" r="1.3" fill="#ffe08a"/><circle cx="20.5" cy="10" r=".9" fill="#ffe08a"/></svg></div>
+    <div>
+      <p class="eyebrow">은빛도담어린이집</p>
+      <h1>연차달력</h1>
+    </div>
+    <label for="codeInput" class="muted small">원감 선생님께 받은 개인 코드를 넣어 주세요</label>
+    <input id="codeInput" class="code-input" type="password" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="••••••">
+    <button class="btn" type="submit" id="loginBtn">들어가기</button>
+    <p id="loginMsg" class="msg bad" hidden></p>
+    <p class="muted small">코드는 본인만 알고 있어야 해요. 다른 사람에게 알려 주지 마세요.</p>
+    <p class="kname" style="padding-top:4px">국공립<span class="g">은빛도담</span><span class="o">어린이집</span></p>
+  </form>
+</section>
+
+<div class="wrap" id="appView" hidden>
+  <div class="clouds" aria-hidden="true"><i style="width:90px;height:26px;top:14px;right:8%"></i><i style="width:52px;height:18px;top:46px;right:22%"></i><i style="width:60px;height:18px;top:78px;right:4%"></i></div>
+  <header class="top">
+    <div class="brand">
+      <div class="logo"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 8a5 5 0 10-1 9.9A6 6 0 1117 8z" fill="#fff"/><circle cx="18" cy="6" r="1.3" fill="#ffe08a"/><circle cx="20.5" cy="10" r=".9" fill="#ffe08a"/></svg></div>
+      <div><h1>연차달력</h1><p class="hi" id="hiLine"></p></div>
+    </div>
+    <div class="me">
+      <span class="who" id="whoName"></span>
+      <span id="mgrBadge" class="badge" hidden>관리자</span>
+      <button class="ghost" id="logoutBtn">로그아웃</button>
+    </div>
+  </header>
+
+  <div id="balanceBar" class="balance" hidden></div>
+  <div id="windowBar" class="window" hidden></div>
+
+  <section class="board">
+    <div class="sheet">
+      <div class="cal-head">
+        <button class="icon-btn" id="prevBtn" aria-label="이전 달">‹</button>
+        <h2 id="monthLabel"></h2>
+        <button class="ghost" id="todayBtn">이번 달</button>
+        <button class="icon-btn" id="nextBtn" aria-label="다음 달">›</button>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="cal" id="cal"></div>
+    </div>
+    <aside class="sheet day" id="dayPanel"></aside>
+  </section>
+
+  <section class="guide-wrap"><h2>이렇게 써요</h2><div class="rules" id="rules"></div></section>
+  <section class="groups" id="groups"></section>
+
+  <section class="sheet">
+    <div class="cal-head"><h2 id="tableTitle" style="font-size:1.3rem;text-align:left">이달의 연차·대체교사</h2></div>
+    <div class="tbl-wrap"><table id="monthTable"></table></div>
+  </section>
+
+  <section class="sheet">
+    <div class="cal-head"><h2 id="logTitle" style="font-size:1.3rem;text-align:left">변경 기록</h2></div>
+    <ul class="log" id="logList"></ul>
+  </section>
+
+  <section class="sheet settings" id="settings" hidden></section>
+  <footer class="kname">국공립<span class="g">은빛도담</span><span class="o">어린이집</span></footer>
+</div>
+<div class="busy" id="busy" hidden>저장 중…</div>
+<div id="printArea"></div>
+
+<script>
+/* 빠른 화면: 화면은 여기서 바로 뜨고, 데이터만 구글 서버에서 받아 와요 */
+var AK = "leave", EK = "eunbit.tokens", API_URL = "https://script.google.com/macros/s/AKfycbz7ZXxbS_XMkyUFAIKmiibvEItlnHrmnhFNDqQn0z8viSVJVs_iXw4QLy9mwAGa7Sfz/exec";
+function rpc(fn, args) {
+  return fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ fn: fn, args: args || [] }) })
+    .then(function (r) { return r.json(); })
+    .then(function (j) { if (!j.ok) throw new Error(j.error || "오류가 났어요."); return j.result; });
+}
+function tokAll() { try { return JSON.parse(localStorage.getItem(EK) || "{}") || {}; } catch (e) { return {}; } }
+function tokGet() { return tokAll()[AK] || ""; }
+function tokSet(v) { try { var t = tokAll(); t[AK] = v; if (AK === "edu") t.noedu = ""; localStorage.setItem(EK, JSON.stringify(t)); } catch (e) {} }
+function tokDel() { try { var t = tokAll(); delete t[AK]; localStorage.setItem(EK, JSON.stringify(t)); localStorage.removeItem("swr." + AK); } catch (e) {} }
+function swrGet() { try { var o = JSON.parse(localStorage.getItem("swr." + AK) || "null"); return o && o.t && o.t === tokGet() ? o.d : null; } catch (e) { return null; } }
+function swrSet(d) { try { localStorage.setItem("swr." + AK, JSON.stringify({ t: tokGet(), d: d })); } catch (e) {} }
+// 서버를 미리 깨워 둬요 (첫 요청이 느려지지 않게)
+try { rpc("__ping", []).catch(function () {}); } catch (e) {}
+</script>
+<script>
+(function(){
+const CLASS_COLORS = {"나무반":"--c-tree","새싹반":"--c-sprout","아름꽃반":"--c-flower","예쁜반":"--c-pretty","푸른반":"--c-blue","연장반":"--c-ext"};
+const TYPES = {"연차":1,"오전반차":0.5,"오후반차":0.5,"연수":0};
+const typeAmount = t => (t in TYPES) ? TYPES[t] : 1;
+const SOURCES = ["미정","육아종합지원센터","인력풀","원내 대체","대체 불필요"];
+const COOK_SOURCES = ["미정","육아종합지원센터","아워홈","CJ","원내 대체","대체 불필요"];
+const CONTACT_SOURCES = ["인력풀","아워홈","CJ"];
+const STATUSES = [["none","신청 전"],["req","신청함"],["ok","배정 완료"],["bad","배정 불가"]];
+const DOW = ["일","월","화","수","목","금","토"];
+const HOLIDAYS = {
+  "2026-01-01":"신정","2026-02-16":"설날 연휴","2026-02-17":"설날","2026-02-18":"설날 연휴","2026-03-01":"삼일절","2026-03-02":"대체공휴일",
+  "2026-05-05":"어린이날","2026-05-24":"부처님오신날","2026-05-25":"대체공휴일","2026-06-03":"지방선거","2026-06-06":"현충일",
+  "2026-08-15":"광복절","2026-08-17":"대체공휴일","2026-09-24":"추석 연휴","2026-09-25":"추석","2026-09-26":"추석 연휴","2026-09-28":"대체공휴일",
+  "2026-10-03":"개천절","2026-10-05":"대체공휴일","2026-10-09":"한글날","2026-12-25":"성탄절",
+  "2027-01-01":"신정","2027-02-06":"설날 연휴","2027-02-07":"설날","2027-02-08":"설날 연휴","2027-02-09":"대체공휴일","2027-03-01":"삼일절",
+  "2027-05-05":"어린이날","2027-05-13":"부처님오신날","2027-06-06":"현충일","2027-08-15":"광복절","2027-08-16":"대체공휴일",
+  "2027-09-14":"추석 연휴","2027-09-15":"추석","2027-09-16":"추석 연휴","2027-10-03":"개천절","2027-10-04":"대체공휴일",
+  "2027-10-09":"한글날","2027-10-11":"대체공휴일","2027-12-25":"성탄절","2027-12-27":"대체공휴일"
+};
+
+const S = { token:"", d:null, y:0, m:0, sel:null, confirmDel:null, editId:null, msg:null, jumped:false };
+S.token = tokGet();
+const SSO = "";
+if (SSO) { S.token = SSO; tokSet(SSO); }
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad = n => String(n).padStart(2,"0");
+const ymd = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
+const parse = s => { const p = s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); };
+const label = s => { const d = parse(s); return `${d.getMonth()+1}월 ${d.getDate()}일 (${DOW[d.getDay()]})`; };
+const shortLabel = s => { const d = parse(s); return `${d.getMonth()+1}/${d.getDate()}(${DOW[d.getDay()]})`; };
+const monthLabel = ym => { const p = ym.split("-").map(Number); return `${p[0]}년 ${p[1]}월`; };
+const classColor = c => `var(${CLASS_COLORS[c] || "--c-none"})`;
+const num = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+const fmt = n => (Math.round(n*1000)/1000).toString();
+// 연차 일수(소수) → "2일 7시간". 한그루는 1시간 = 0.125일(하루 8시간)로 적는다.
+const dhm = n => { const h = Math.round(Math.abs(n||0)*8); return { neg:(n||0)<0 && h>0, d:Math.floor(h/8), h:h%8 }; };
+const dur = n => { if (n == null || n === "") return ""; const x = dhm(n); const s = x.d && x.h ? `${x.d}일 ${x.h}시간` : x.h ? `${x.h}시간` : `${x.d}일`; return (x.neg ? "-" : "") + s; };
+
+const today = () => S.d.today;
+const me = () => S.d.me;
+const isMgr = () => !!S.d.me.manager;
+const staffList = () => S.d.staff.filter(s => s.active);
+const staffById = id => S.d.staff.find(s => s.id === id);
+const nameOf = id => (staffById(id) || {}).name || "(삭제된 교직원)";
+const classesOf = id => (staffById(id) || {}).classes || [];
+const isCook = id => /조리/.test((staffById(id) || {}).role || "");
+// 화면에 보이는 반 이름. 반이 없는 원장·조리사는 직책으로 표시(규칙 묶음에는 넣지 않음).
+const classLabels = id => {
+  const st = staffById(id) || {};
+  if ((st.classes || []).length) return st.classes;
+  if (/원장/.test(st.role || "") && !/원감/.test(st.role || "")) return ["원장님"];
+  if (/조리/.test(st.role || "")) return ["조리사"];
+  return [];
+};
+const contactWho = () => S.d.settings.contactName ? `연차 담당자(${S.d.settings.contactName} 선생님)` : "연차 담당자";
+const maxPerDay = () => S.d.settings.maxPerDay;
+const classMax = () => S.d.settings.classMax;
+const leavesOn = date => S.d.leaves.filter(l => l.date === date);
+const countOn = date => new Set(leavesOn(date).filter(l => !(staffById(l.staffId)||{}).exempt).map(l => l.staffId)).size;
+const eventsOn = date => S.d.events.filter(e => e.date <= date && date <= (e.end || e.date)).sort((a,b)=>a.date.localeCompare(b.date));
+const statusOf = id => (S.d.subs[id] || {}).status || "none";
+const statusText = k => (STATUSES.find(s => s[0] === k) || STATUSES[0])[1];
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d.getFullYear(), d.getMonth(), d.getDate()); };
+// start~end 사이 근무일(주말·공휴일·휴원일 제외)
+function workdays(start, end){
+  const out = [];
+  for (let s = start; s <= end && out.length <= 40; s = addDays(s, 1)) if (!closedReason(s)) out.push(s);
+  return out;
+}
+// 이 연차와 이어지는 같은 선생님의 연차들(사이에 주말·공휴일만 있으면 연속으로 봐요)
+function runOf(l){
+  const mine = S.d.leaves.filter(x => x.staffId === l.staffId).sort((a,b) => a.date.localeCompare(b.date));
+  const next = d => { let s = addDays(d, 1); for (let i = 0; i < 10 && closedReason(s); i++) s = addDays(s, 1); return s; };
+  const prev = d => { let s = addDays(d, -1); for (let i = 0; i < 10 && closedReason(s); i++) s = addDays(s, -1); return s; };
+  const run = [l];
+  for (let cur = l; ; ) { const n = mine.find(x => x.date === next(cur.date)); if (!n) break; run.push(n); cur = n; }
+  for (let cur = l; ; ) { const p = mine.find(x => x.date === prev(cur.date)); if (!p) break; run.unshift(p); cur = p; }
+  return run;
+}
+
+/* ---------- server calls ---------- */
+function call(fn){
+  const args = [].slice.call(arguments, 1);
+  return rpc(fn, args).catch(err => {
+    const msg = (err && err.message) || String(err);
+    if (/AUTH/.test(msg)) { showLogin(); throw new Error("로그인이 필요해요."); }
+    throw new Error(msg.replace(/^Error:\s*/, "").replace(/^Exception:\s*/, ""));
+  });
+}
+async function act(fn){
+  const args = [].slice.call(arguments, 1);
+  $("#busy").hidden = false;
+  try { const d = await call.apply(null, [fn, S.token].concat(args)); setData(d); return true; }
+  finally { $("#busy").hidden = true; }
+}
+
+/* ---------- login ---------- */
+function showLogin(msg){
+  S.token = ""; tokDel();
+  $("#appView").hidden = true; $("#loginView").hidden = false;
+  const m = $("#loginMsg"); m.hidden = !msg; m.textContent = msg || "";
+  setTimeout(() => $("#codeInput").focus(), 50);
+}
+$("#loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const code = $("#codeInput").value.trim();
+  if (!code) return;
+  $("#loginBtn").disabled = true; $("#loginBtn").textContent = "확인 중…";
+  try {
+    const r = await call("login", code);
+    S.token = r.token; tokSet(S.token);
+    $("#codeInput").value = "";
+    await load();
+  } catch(err) {
+    const m = $("#loginMsg"); m.hidden = false; m.textContent = err.message;
+  } finally { $("#loginBtn").disabled = false; $("#loginBtn").textContent = "들어가기"; }
+});
+$("#logoutBtn").onclick = async () => { const t = S.token; showLogin(); try { await call("logout", t); } catch(_) {} };
+
+async function load(){
+  const c = swrGet();
+  if (c) setData(c, true);
+  try {
+    const d = await call("getData", S.token);
+    if (!c || JSON.stringify(d) !== JSON.stringify(c)) setData(d);
+  } catch(err) { if (S.token && !c) showLogin(err.message); }
+}
+function setData(d, fromCache){
+  S.d = d; if (!fromCache) swrSet(d);
+  if (!S.y) { const t = parse(d.today); S.y = t.getFullYear(); S.m = t.getMonth(); }
+  const st = d.settings;
+  if (!S.jumped && st.applyTarget && st.applyOpen && st.applyClose && d.today <= st.applyClose) {
+    const p = st.applyTarget.split("-").map(Number); S.y = p[0]; S.m = p[1]-1;
+  }
+  S.jumped = true;
+  $("#loginView").hidden = true; $("#appView").hidden = false;
+  renderAll();
+}
+
+/* ---------- rules ---------- */
+function closedReason(date){
+  if (S.d.closed[date]) return S.d.closed[date];
+  if (HOLIDAYS[date]) return HOLIDAYS[date];
+  const d = parse(date).getDay();
+  return (d === 0 || d === 6) ? "주말" : "";
+}
+function windowState(){
+  const s = S.d.settings;
+  const w = { open:s.applyOpen, close:s.applyClose, target:s.applyTarget };
+  if (!w.open || !w.close) w.status = "none";
+  else if (today() < w.open) w.status = "before";
+  else if (today() > w.close) w.status = "closed";
+  else w.status = "open";
+  return w;
+}
+function formLock(date){
+  if (isMgr()) return "";
+  const w = windowState();
+  if (w.status === "none") return "지금은 연차 신청 기간이 아니에요. 담당자가 신청 기간을 열면 신청할 수 있어요.";
+  if (w.status === "before") return `신청 기간은 ${label(w.open)}부터 ${label(w.close)}까지예요.`;
+  if (w.status === "closed") return `${w.target ? monthLabel(w.target)+" " : ""}연차 신청이 ${label(w.close)}에 마감됐어요. 마감 후 신청·취소는 ${contactWho()}에게 구두로 해 주세요.`;
+  if (w.target && date.indexOf(w.target) !== 0) return `이번 신청 기간에는 ${monthLabel(w.target)} 연차만 신청할 수 있어요.`;
+  if (date < today()) return "지난 날짜는 신청할 수 없어요.";
+  return "";
+}
+function blockers(date, staffId){
+  const r = [];
+  const st = staffById(staffId);
+  if (!st) return ["선생님을 선택해 주세요"];
+  const off = closedReason(date);
+  if (off) r.push(`${off}에는 신청할 수 없어요`);
+  const day = leavesOn(date);
+  if (day.some(l => l.staffId === staffId)) { r.push("이미 이 날 연차를 신청했어요"); return r; }
+  if (!st.exempt && countOn(date) >= maxPerDay()) r.push(`하루 최대 ${maxPerDay()}명이 이미 찼어요`);
+  (st.classes || []).forEach(c => {
+    const names = [...new Set(day.filter(l => classesOf(l.staffId).indexOf(c) >= 0).map(l => nameOf(l.staffId)))];
+    if (names.length >= classMax()) r.push(`${c}에서 ${names.join(", ")} 선생님이 이미 쉬어요`);
+  });
+  return r;
+}
+// 이번 학년도(3월~다음 해 2월) 범위. 한그루 연차대장과 같은 기준.
+function schoolYear(){
+  const t = parse(today()); const y = t.getMonth() >= 2 ? t.getFullYear() : t.getFullYear() - 1;
+  return { start:`${y}-03-01`, end:`${y+1}-02-31` };
+}
+// 달력에는 있지만 한그루 연차대장(기본형) 사용일자에는 아직 없는 연차.
+function notInHangloo(staffId){
+  const st = staffById(staffId); const b = st && S.d.balances[st.name];
+  if (!b) return [];
+  const mine = S.d.leaves.filter(l => l.staffId === staffId && typeAmount(l.type) > 0);
+  if (!b.dates) return mine.filter(l => (l.createdAt || "") > (b.syncedAt || ""));
+  const used = new Set(b.dates.split(",").map(x => x.trim().slice(0,5)));
+  const sy = schoolYear();
+  return mine.filter(l => l.date >= sy.start && l.date <= sy.end && !used.has(l.date.slice(5).replace("-","/")))
+             .sort((a,b2) => a.date.localeCompare(b2.date));
+}
+// 한그루 기준 남은 연차에서, 한그루에 아직 입력되지 않은 달력 연차를 뺀 예상치.
+function balanceOf(staffId){
+  const st = staffById(staffId); if (!st) return null;
+  const b = S.d.balances[st.name]; if (!b) return null;
+  const remain = num(b.remain); if (remain == null) return null;
+  const missing = notInHangloo(staffId);
+  const extra = missing.reduce((a,l) => a + typeAmount(l.type), 0);
+  return { total:num(b.total), used:num(b.used), remain, extra, missing, expected: remain - extra, syncedAt: b.syncedAt || "" };
+}
+
+/* ---------- header ---------- */
+function renderHeader(){
+  $("#whoName").textContent = `${me().name} ${me().role || ""}`;
+  $("#hiLine").textContent = `${me().name} 선생님, 쉼표 하나 찍어 볼까요?`;
+  $("#mgrBadge").hidden = !isMgr();
+  const bar = $("#balanceBar");
+  const b = balanceOf(me().id);
+  if (!b) { bar.hidden = true; return; }
+  bar.hidden = false;
+  // 남은 연차 비율을 동그란 그래프로 (총 연차 대비)
+  const pct = b.total > 0 ? Math.max(0, Math.min(100, b.expected / b.total * 100)) : 0;
+  const rx = dhm(b.expected);
+  bar.innerHTML = `<div class="ring ${b.expected<0?"neg":""}" style="--p:${pct}%"><span>${rx.neg?"-":""}${rx.d||!rx.h?rx.d+"일":rx.h+"시간"}<small>${rx.d&&rx.h?rx.h+"시간":"남은 연차"}</small></span></div>
+    <div><span class="big ${b.expected<0?"neg":""}">내 남은 연차 ${dur(b.expected)}</span>
+    <span class="sub">총 ${dur(b.total)} · 사용 ${dur(b.used)}${b.extra?` · 한그루 미입력 ${dur(b.extra)}`:""}<br>${esc(b.syncedAt.slice(5,10).replace("-","/"))} 한그루 연동 (예상)</span></div>`;
+}
+// Days from the viewer's today to a yyyy-mm-dd date (calendar days, local clock).
+function daysUntil(date){
+  const n = new Date(); const t = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  return Math.round((parse(date) - t) / 864e5);
+}
+function countdown(w){
+  if (w.status === "before") { const d = daysUntil(w.open); return d <= 0 ? "곧 시작" : `시작까지 D-${d}`; }
+  if (w.status === "open") {
+    const d = daysUntil(w.close);
+    if (d > 0) return `마감 D-${d}`;
+    const end = parse(w.close); end.setHours(23,59,59);
+    const mins = Math.max(0, Math.floor((end - new Date()) / 60000));
+    return `오늘 마감 · ${Math.floor(mins/60)}시간 ${mins%60}분 남음`;
+  }
+  if (w.status === "closed") return "마감됨";
+  return "";
+}
+function renderWindow(){
+  const bar = $("#windowBar");
+  const w = windowState();
+  bar.hidden = false;
+  bar.className = "window " + w.status + (w.status === "open" && daysUntil(w.close) <= 1 ? " urgent" : "");
+  const t = w.target ? monthLabel(w.target) + " 연차 신청" : "연차 신청";
+  const cd = countdown(w);
+  const right = cd ? `<span class="dday">${esc(cd)}</span>` : "";
+  if (w.status === "none") bar.innerHTML = `<b>연차 신청 기간이 아니에요</b><span class="muted small">신청 기간이 열리면 이곳에 안내돼요.</span>`;
+  else if (w.status === "before") bar.innerHTML = `<b>${esc(t)}</b><span class="when">${label(w.open)} ~ ${label(w.close)}</span><span class="small">아직 열리지 않았어요</span>${right}`;
+  else if (w.status === "open") bar.innerHTML = `<b>${esc(t)} 기간이에요</b><span class="when">${label(w.open)} ~ ${label(w.close)}</span><span class="small">행사 일정을 확인하고 신청해 주세요</span>${right}`;
+  else bar.innerHTML = `<b>${esc(t)} 마감</b><span class="when">${label(w.close)} 마감</span><span class="small">추가 신청·취소는 ${esc(contactWho())}에게 구두로 해 주세요</span>${right}`;
+}
+
+/* ---------- calendar ---------- */
+function renderLegend(){
+  const cls = [...new Set(staffList().flatMap(s => s.classes || []))];
+  const items = cls.map(c => `<span><i class="dot" style="background:${classColor(c)}"></i>${esc(c)}</span>`);
+  items.push(`<span><i class="sq" style="background:var(--event)"></i>행사</span>`);
+  items.push(`<span><i class="dot" style="background:var(--warn)"></i>대체 신청함</span>`);
+  items.push(`<span><i class="dot" style="background:var(--ok)"></i>대체 배정 완료</span>`);
+  $("#legend").innerHTML = items.join("");
+}
+function chipColor(staffId){
+  const c = classesOf(staffId).filter(x => x !== "연장반");
+  return c.length === 1 ? classColor(c[0]) : (c.length ? "var(--muted)" : "var(--c-none)");
+}
+function renderCal(){
+  $("#monthLabel").textContent = `${S.y}년 ${S.m+1}월`;
+  const first = new Date(S.y, S.m, 1).getDay();
+  const days = new Date(S.y, S.m+1, 0).getDate();
+  let html = DOW.map((d,i) => `<div class="dow ${i===0?"sun":i===6?"sat":""}">${d}</div>`).join("");
+  for (let i=0;i<first;i++) html += `<div class="cell blank" aria-hidden="true"></div>`;
+  for (let d=1; d<=days; d++){
+    const date = ymd(S.y,S.m,d);
+    const wd = (first + d - 1) % 7;
+    const off = closedReason(date);
+    const list = leavesOn(date).slice().sort((a,b)=>(a.createdAt||"").localeCompare(b.createdAt||""));
+    const n = countOn(date);
+    const evs = eventsOn(date).map(e => `<span class="ev" title="${esc(e.title)}">${esc(e.title)}</span>`).join("");
+    const chips = list.map(l => {
+      const st = statusOf(l.id);
+      const sub = S.d.subs[l.id];
+      const subTxt = st === "ok" ? ((sub && sub.subName) || "대체") : st === "req" ? "신청" : st === "bad" ? "불가" : "";
+      return `<span class="chip ${l.mine?"mine":""}"><i class="dot" style="background:${chipColor(l.staffId)}"></i><span class="nm">${esc(nameOf(l.staffId))}${/반차/.test(l.type)?"½":l.type==="연수"?"·연수":""}</span>${subTxt?`<span class="sub st-${st}">${esc(subTxt)}</span>`:""}</span>`;
+    }).join("");
+    const cls = ["cell", wd===0?"sun":"", wd===6?"sat":"", off?"closed":"", date===S.sel?"sel":"", date===today()?"today":""].join(" ");
+    const hol = off && off !== "주말" ? `<span class="hol">${esc(off)}</span>` : "";
+    html += `<button class="${cls}" data-date="${date}" aria-label="${label(date)} 연차 ${n}명"><span class="num"><span class="d">${d}</span>${n?`<span class="cnt ${n>=maxPerDay()?"full":""}">${n}/${maxPerDay()}</span>`:""}</span>${hol}${evs}${chips}</button>`;
+  }
+  const tail = (7 - (first + days) % 7) % 7;
+  for (let i=0;i<tail;i++) html += `<div class="cell blank" aria-hidden="true"></div>`;
+  $("#cal").innerHTML = html;
+}
+
+/* ---------- day panel ---------- */
+function subEditor(l){
+  const s = S.d.subs[l.id] || {};
+  const st = s.status || "none";
+  const cook = isCook(l.staffId);
+  const who = cook ? "대체조리사" : "대체교사";
+  const sources = cook ? COOK_SOURCES : SOURCES;
+  const src = s.source || "미정";
+  if (!isMgr()) {
+    if (!s.status && !s.subName && !s.memo) return `<div class="subbox"><span class="muted small">${who}: 담당자 확인 전</span></div>`;
+    return `<div class="subbox">
+      <div class="row"><span class="lbl">신청처</span><span>${esc(src)}</span></div>
+      <div class="row"><span class="lbl">상태</span><span><span class="pill st-${st}">${statusText(st)}</span></span></div>
+      ${s.subName?`<div class="row"><span class="lbl">${who}</span><strong>${esc(s.subName)}</strong></div>`:""}
+      ${s.contact && CONTACT_SOURCES.indexOf(src) >= 0?`<div class="row"><span class="lbl">연락처</span><span>${esc(s.contact)}</span></div>`:""}
+      ${s.memo?`<div class="row"><span class="lbl">전달사항</span><span>${esc(s.memo)}</span></div>`:""}
+    </div>`;
+  }
+  return `<div class="subbox">
+    <div class="row"><label class="lbl" for="src-${l.id}">신청처</label><select id="src-${l.id}" data-srcfor="${l.id}">${sources.map(x=>`<option ${x===src?"selected":""}>${x}</option>`).join("")}</select></div>
+    <div class="row"><label class="lbl" for="sts-${l.id}">상태</label><select id="sts-${l.id}">${STATUSES.map(p=>`<option value="${p[0]}" ${p[0]===st?"selected":""}>${p[1]}</option>`).join("")}</select></div>
+    <div class="row"><label class="lbl" for="nm-${l.id}">${who}</label><input type="text" id="nm-${l.id}" value="${esc(s.subName||"")}" placeholder="배정된 ${cook ? "조리사" : "선생님"} 이름"></div>
+    <div class="row" id="ctrow-${l.id}" ${CONTACT_SOURCES.indexOf(src) >= 0 ? "" : "hidden"}><label class="lbl" for="ct-${l.id}">연락처</label><input type="text" id="ct-${l.id}" value="${esc(s.contact||"")}" placeholder="010-0000-0000" inputmode="tel"></div>
+    <div class="row"><label class="lbl" for="mm-${l.id}">전달사항</label><input type="text" id="mm-${l.id}" value="${esc(s.memo||"")}" placeholder="${cook ? "출근 시간, 식단 전달 등" : "출근 시간, 담당 반 등"}"></div>
+    ${(() => { const run = runOf(l); return run.length > 1 ? `<label class="check runall"><input type="checkbox" id="all-${l.id}" checked> 연속 연차 ${run.length}일(${shortLabel(run[0].date)}~${shortLabel(run[run.length-1].date)})에 모두 적용</label>` : ""; })()}
+    <div><button class="btn line" data-savesub="${l.id}">${who} 정보 저장</button></div>
+  </div>`;
+}
+function changeForm(l){
+  return `<div class="chg">
+    <div class="inline">
+      <label class="check">날짜 <input type="date" id="cDate-${l.id}" value="${l.date}"></label>
+      <label class="check">종류 <select id="cType-${l.id}">${Object.keys(TYPES).filter(t => isMgr() || t !== "연수").map(t=>`<option ${t===l.type?"selected":""}>${t}</option>`).join("")}</select></label>
+    </div>
+    ${isMgr()?`<label class="check"><input type="checkbox" id="cOver-${l.id}"> 규칙에 걸려도 담당자 판단으로 변경</label>`:""}
+    <div class="inline"><button class="btn" data-chgsave="${l.id}">바꾸기</button><button class="ghost" data-chgcancel>닫기</button></div>
+  </div>`;
+}
+function canDelete(l){
+  if (isMgr()) return true;
+  if (windowState().status !== "open") return false;
+  if (statusOf(l.id) === "ok") return false;
+  return l.mine;
+}
+function renderDay(){
+  const p = $("#dayPanel");
+  if (!S.sel) {
+    p.innerHTML = `<h3>날짜를 눌러 주세요</h3><p class="muted">달력에서 날짜를 누르면 그날 행사와 쉬는 선생님, 대체교사 배정 결과를 보고 연차를 신청할 수 있어요.</p>`;
+    return;
+  }
+  const date = S.sel;
+  const list = leavesOn(date);
+  const n = countOn(date);
+  const off = closedReason(date);
+  let h = `<div class="day-head"><h3>${label(date)}</h3><span class="pill ${n>=maxPerDay()?"st-bad":n?"st-req":"st-none"}">${n} / ${maxPerDay()}명</span></div>`;
+  if (off) h += `<p class="muted small">${esc(off)} · 쉬는 날이에요</p>`;
+  eventsOn(date).forEach(e => {
+    const range = e.end && e.end !== e.date ? `${shortLabel(e.date)} ~ ${shortLabel(e.end)}` : "";
+    const del = !isMgr() ? "" : S.confirmDel === "ev:"+e.id
+      ? `<div class="inline"><span class="small">이 행사를 지울까요?</span><button class="btn danger" data-delev="${e.id}">지우기</button><button class="ghost" data-nodel>아니요</button></div>`
+      : `<div><button class="linkbtn" data-askdel="ev:${e.id}">행사 삭제</button></div>`;
+    h += `<div class="event-card"><div class="t"><span class="small muted">행사</span><strong>${esc(e.title)}</strong>${range?`<span class="small muted">${range}</span>`:""}</div>${e.memo?`<p class="small">${esc(e.memo)}</p>`:""}${del}</div>`;
+  });
+  if (!list.length && !off) h += `<p class="muted small">아직 연차를 신청한 선생님이 없어요.</p>`;
+  list.forEach(l => {
+    const st = staffById(l.staffId) || {};
+    const cls = classLabels(l.staffId).map(c=>`<span class="cls" style="color:${classColor(c)}">${esc(c)}</span>`).join("");
+    const delUi = !canDelete(l) ? "" : S.confirmDel === l.id
+      ? `<div class="inline"><span class="small">이 연차를 취소할까요?</span><button class="btn danger" data-del="${l.id}">취소하기</button><button class="ghost" data-nodel>아니요</button></div>`
+      : S.editId === l.id ? changeForm(l)
+      : `<div class="inline"><button class="linkbtn" data-askchg="${l.id}" style="color:var(--accent-dk)">날짜·종류 바꾸기</button><button class="linkbtn" data-askdel="${l.id}">연차 취소</button></div>`;
+    h += `<div class="leave">
+      <div class="leave-top"><strong>${esc(nameOf(l.staffId))}</strong><span class="muted small">${esc(st.role||"")}</span>${cls}<span class="pill st-none">${esc(l.type)}</span>${l.override?`<span class="pill st-req">예외 승인</span>`:""}${l.byManager?`<span class="pill st-none">담당자 등록</span>`:""}</div>
+      ${l.memo?`<p class="small">${esc(l.memo)}</p>`:""}
+      ${subEditor(l)}
+      ${delUi}
+    </div>`;
+  });
+  h += renderForm(date);
+  if (isMgr()) h += renderEventForm(date);
+  p.innerHTML = h;
+  updateWhy();
+}
+function renderForm(date){
+  const lock = formLock(date);
+  if (lock) return `<div class="lock"><h3>연차 신청</h3><p class="msg bad">${esc(lock)}</p></div>`;
+  if (closedReason(date) && !isMgr()) return "";
+  const evs = eventsOn(date);
+  const evMsg = evs.length ? `<div class="msg event">이날은 <b>${evs.map(e=>esc(e.title)).join(", ")}</b> 행사가 있어요. 확인하고 신청해 주세요.</div>` : "";
+  const msg = S.msg ? `<div class="msg ${S.msg.kind}">${esc(S.msg.text)}</div>` : "";
+  let who;
+  if (isMgr()) {
+    const opts = staffList().map(s => {
+      const b = blockers(date, s.id);
+      return `<option value="${s.id}" ${s.id===me().id?"selected":""}>${esc(s.name)} · ${esc(s.role||"")}${b.length?" (불가)":""}</option>`;
+    }).join("");
+    who = `<div class="field"><label for="fStaff">선생님</label><select id="fStaff">${opts}</select></div>`;
+  } else {
+    who = `<input type="hidden" id="fStaff" value="${me().id}"><p class="small"><b>${esc(me().name)}</b> 선생님 연차</p>`;
+  }
+  let avail = "";
+  if (isMgr()) {
+    const free = staffList().filter(s => !blockers(date, s.id).length);
+    const blocked = staffList().filter(s => blockers(date, s.id).length && !leavesOn(date).some(l=>l.staffId===s.id));
+    avail = `<div class="avail">
+      <p class="small"><b>신청 가능</b> <span class="muted">${free.length ? free.map(s=>esc(s.name)).join(", ") : "없음"}</span></p>
+      ${blocked.length?`<p class="small"><b>겹쳐서 불가</b></p><ul>${blocked.map(s=>`<li class="small"><i class="dot" style="background:var(--bad)"></i><span><b>${esc(s.name)}</b> <span class="muted">${esc(blockers(date,s.id).join(" · "))}</span></span></li>`).join("")}</ul>`:""}
+    </div>`;
+  }
+  return `<form class="form" id="leaveForm">
+    <h3>${isMgr() ? "연차 등록" : "연차 신청"}</h3>
+    ${evMsg}
+    ${who}
+    <div class="field"><label for="fType">종류</label><select id="fType">${Object.keys(TYPES).filter(t => isMgr() || t !== "연수").map(t=>`<option>${t}</option>`).join("")}</select></div>
+    <div class="field"><label for="fEnd">끝나는 날 (여러 날 연속으로 쉴 때)</label><input type="date" id="fEnd" min="${date}" value=""></div>
+    <div class="field"><label for="fMemo">메모 (선택)</label><input type="text" id="fMemo" maxlength="200" placeholder="예: 병원 진료, 가족 행사"></div>
+    <div id="fWhy"></div>
+    ${isMgr()?`<label class="check"><input type="checkbox" id="fOverride"> 규칙에 걸려도 담당자 판단으로 등록 (구두 신청 포함)</label>`:""}
+    <button class="btn" type="submit" id="fSubmit">${isMgr() ? "등록하기" : "신청하기"}</button>
+    ${msg}
+    ${avail}
+  </form>`;
+}
+function renderEventForm(date){
+  return `<form class="form" id="eventForm">
+    <h3>행사 추가</h3>
+    <div class="field"><label for="eTitle">행사 이름</label><input type="text" id="eTitle" placeholder="예: 가을 소풍, 부모 참여수업" maxlength="60"></div>
+    <div class="field"><label for="eEnd">끝나는 날 (여러 날 행사일 때)</label><input type="date" id="eEnd" min="${date}"></div>
+    <div class="field"><label for="eMemo">메모 (선택)</label><input type="text" id="eMemo" placeholder="예: 전 교사 참석, 오전 9시 출발" maxlength="200"></div>
+    <button class="btn event" type="submit">${shortLabel(date)} 행사 추가</button>
+  </form>`;
+}
+// 신청하려는 날짜들: 끝나는 날이 있으면 그 사이 근무일 전부
+function formDays(){
+  const end = ($("#fEnd") || {}).value || "";
+  return end && end > S.sel ? workdays(S.sel, end) : [S.sel];
+}
+function formProblems(id){
+  const days = formDays();
+  const out = [];
+  days.forEach(d => {
+    const lock = formLock(d);
+    const b = lock ? [lock] : blockers(d, id);
+    if (b.length) out.push(days.length > 1 ? `${shortLabel(d)} ${b.join(", ")}` : b.join(" · "));
+  });
+  return out;
+}
+function updateWhy(){
+  const el = $("#fWhy"); if (!el) return;
+  const id = $("#fStaff").value;
+  if (!id) { el.innerHTML = ""; return; }
+  const days = formDays();
+  const b = formProblems(id);
+  const amt = typeAmount(($("#fType")||{}).value || "연차") * days.length;
+  const bal = balanceOf(id);
+  const many = days.length > 1;
+  let out = many ? `<div class="msg event">연속 ${days.length}일 · ${days.map(shortLabel).join(", ")}<br><span class="small">주말·공휴일·휴원일은 빼고 신청돼요.</span></div>` : "";
+  if (!days.length) out = `<div class="msg bad">고른 기간에 근무일이 없어요.</div>`;
+  else out += b.length ? `<div class="msg bad">${b.map(esc).join("<br>")}</div>` : `<div class="msg ok">${many ? `${days.length}일 모두` : "이 날"} 신청할 수 있어요.</div>`;
+  if (bal) {
+    const after = bal.expected - amt;
+    out += `<div class="msg ${after < 0 ? "warn" : "ok"}">남은 연차 ${dur(bal.expected)} → 신청 후 ${dur(after)}${after < 0 ? " · 남은 연차보다 많아요. 담당자와 상의해 주세요." : ""}</div>`;
+  }
+  el.innerHTML = out;
+}
+
+/* ---------- month table ---------- */
+function renderTable(){
+  const prefix = `${S.y}-${pad(S.m+1)}`;
+  const first = `${prefix}-01`;
+  const last = `${prefix}-${pad(new Date(S.y,S.m+1,0).getDate())}`;
+  $("#tableTitle").textContent = `${S.m+1}월 연차·대체교사`;
+  // 행사는 빼고 이 달 연차만
+  const rows = S.d.leaves.filter(l => l.date.indexOf(prefix) === 0).map(l => ({kind:"l", date:l.date, l}))
+    .sort((a,b) => a.date.localeCompare(b.date));
+  if (!rows.length) { $("#monthTable").innerHTML = `<tbody><tr><td class="empty">이 달에는 아직 연차가 없어요.</td></tr></tbody>`; return; }
+  // 제목에 달이 있으니 날짜는 "2일(수)"만, 반은 "예쁜"처럼 짧게. 종류 칸은 없애고 연차가 아닐 때만 이름 옆에 표시.
+  const dayLabel = s => { const d = parse(s); return `${d.getDate()}일(${DOW[d.getDay()]})`; };
+  const shortClass = c => c.replace(/반$/, "");
+  $("#monthTable").innerHTML = `<thead><tr><th>날짜</th><th>선생님</th><th>반</th><th>대체 신청처</th><th>상태</th><th>대체교사</th><th>전달사항</th></tr></thead><tbody>${
+    rows.map(r => {
+      const l = r.l; const s = S.d.subs[l.id] || {}; const st = s.status || "none";
+      const typeTag = l.type && l.type !== "연차" ? ` <span class="muted small">(${esc(l.type)})</span>` : "";
+      return `<tr data-date="${l.date}"><td class="num">${dayLabel(l.date)}</td><td><b>${esc(nameOf(l.staffId))}</b>${typeTag}${l.memo?`<div class="muted small">${esc(l.memo)}</div>`:""}</td><td>${esc(classLabels(l.staffId).map(shortClass).join(", ") || "-")}</td><td>${esc(s.source||"미정")}</td><td><span class="pill st-${st}">${statusText(st)}</span></td><td>${esc(s.subName||"-")}${s.contact?`<div class="muted small">${esc(s.contact)}</div>`:""}</td><td>${esc(s.memo||"")}</td></tr>`;
+    }).join("")}</tbody>`;
+}
+
+/* ---------- 변경 기록 (보고 있는 달) ---------- */
+function renderLog(){
+  const ym = `${S.y}-${pad(S.m+1)}`;
+  const logs = (S.d.logs || []).filter(l => (l.date || "").slice(0,7) === ym);
+  $("#logTitle").textContent = `${S.m+1}월 변경 기록`;
+  $("#logList").innerHTML = logs.length ? logs.map(l => {
+    const arrow = l.from && l.to ? `${esc(l.from)} → ${esc(l.to)}` : esc(l.to || l.from);
+    const who = l.kind === "변경" || l.kind === "대체교사" ? `<b>${esc(l.text)}</b> ` : "";
+    const note = l.kind !== "변경" && l.kind !== "대체교사" && l.text ? ` <span class="muted">· ${esc(l.text)}</span>` : "";
+    return `<li><span class="when">${esc((l.at || "").slice(5,16))}<br>${esc(l.by)}</span><span><span class="k k-${esc(l.kind)}">${esc(l.kind)}</span>${shortLabel(l.date)} ${who}${arrow}${note}</span></li>`;
+  }).join("") : `<li class="empty" style="display:block">이 달은 아직 신청·취소·변경 기록이 없어요.</li>`;
+}
+
+/* ---------- 인쇄 (관리자) : 11월 연차배치표 모양 ---------- */
+const EN_MON = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+const phone = s => { const d = String(s || "").replace(/\D/g, ""); return d.length === 11 ? `${d.slice(0,3)}.${d.slice(3,7)}.${d.slice(7)}` : d.length === 10 ? `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}` : String(s || ""); };
+function printTitle(staffId){
+  const st = staffById(staffId) || {};
+  if (/조리/.test(st.role || "")) return "조리사님";
+  if (/원장/.test(st.role || "") && !/원감/.test(st.role || "")) return "원장님";
+  return "교사";
+}
+function printEntry(l){
+  const s = S.d.subs[l.id] || {};
+  const cook = isCook(l.staffId);
+  const typeTxt = l.type && l.type !== "연차" ? `(${esc(l.type)})` : "";
+  const srcTag = cook && s.source && ["육아종합지원센터","아워홈","CJ"].indexOf(s.source) >= 0 ? `(${esc(s.source === "육아종합지원센터" ? "육아종" : s.source)})` : "";
+  let h = `<div class="nm">${esc(nameOf(l.staffId))} ${printTitle(l.staffId)}${typeTxt}${srcTag}</div>`;
+  if (cook) { if (s.subName) h += `<div class="sb">(${esc(s.subName)}${s.contact ? `: ${esc(phone(s.contact))}` : ""})</div>`; return h; }
+  if (s.subName) {
+    const where = s.source && s.source !== "미정" && s.source !== "원내 대체" ? `(${esc(s.source)})` : "";
+    const tail = s.contact ? `: ${esc(phone(s.contact))}` : s.memo ? `: ${esc(s.memo)}` : "";
+    h += `<div class="sb">(${esc(s.subName)}${s.source === "원내 대체" ? "" : " 교사"}${where}${tail})</div>`;
+  } else if (s.status === "bad") h += `<div class="sb">(대체 못 구함${s.memo ? `: ${esc(s.memo)}` : ""})</div>`;
+  return h;
+}
+function buildPrint(ym, withEvents){
+  const [y, m] = ym.split("-").map(Number);
+  const first = new Date(y, m-1, 1).getDay();
+  const days = new Date(y, m, 0).getDate();
+  const weeks = Math.ceil((first + days) / 7);
+  const cellH = Math.floor(158 / weeks);
+  let cells = [];
+  for (let i = 0; i < first; i++) cells.push(`<td></td>`);
+  for (let d = 1; d <= days; d++) {
+    const date = `${ym}-${pad(d)}`;
+    const wd = (first + d - 1) % 7;
+    const hol = HOLIDAYS[date] || S.d.closed[date] || "";
+    const cls = wd === 0 || hol ? "sun" : wd === 6 ? "sat" : "";
+    const list = leavesOn(date).slice().sort((a,b) => (a.createdAt||"").localeCompare(b.createdAt||""));
+    const evs = withEvents ? eventsOn(date).map(e => `<div class="ev">${esc(e.title)}</div>`).join("") : "";
+    cells.push(`<td style="height:${cellH}mm"><div class="d ${cls}">${d}${hol ? `<small>${esc(hol)}</small>` : ""}</div>${evs}${list.map(printEntry).join("")}</td>`);
+  }
+  while (cells.length % 7) cells.push(`<td></td>`);
+  const rows = []; for (let i = 0; i < cells.length; i += 7) rows.push(`<tr>${cells.slice(i, i+7).join("")}</tr>`);
+  $("#printArea").innerHTML = `<div class="ph"><span class="pm">${m}</span><span class="py">${y}<br>${EN_MON[m-1]}</span></div>
+    <table><thead><tr><th class="sun">SUN</th><th>MON</th><th>TUE</th><th>WED</th><th>THU</th><th>FRI</th><th class="sat">SAT</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
+}
+
+/* ---------- rules ---------- */
+function renderRules(){
+  const groups = {};
+  staffList().forEach(s => (s.classes||[]).forEach(c => (groups[c] = groups[c] || []).push(s.name)));
+  const g = Object.keys(groups).map(c => `<b style="color:${classColor(c)}">${esc(c)}</b> ${esc(groups[c].join(", "))}`).join("<br>");
+  const exempt = staffList().filter(s => s.exempt).map(s => `${s.name} ${s.role||""}`);
+  const w = windowState();
+  const wtxt = w.status === "none" ? "담당자가 신청 기간을 정하면 그 기간에만 신청할 수 있어요."
+    : `${w.target ? monthLabel(w.target)+" 연차는 " : ""}${label(w.open)}부터 ${label(w.close)}까지 신청해요. 마감 후 신청·취소는 ${contactWho()}에게 구두로 해요.`;
+  // 짧은 그림 카드 3장
+  const short = w.status === "none" ? "기간이 열리면<br>신청할 수 있어요" : `${shortLabel(w.open)}<br>~ ${shortLabel(w.close)}`;
+  $("#rules").innerHTML = [
+    ["#ffeef4", `<svg width="28" height="28" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="#ef6f8e"/></svg>`, "기간 안에", short, wtxt],
+    ["#ece6ff", `<svg width="28" height="28" viewBox="0 0 24 24"><circle cx="7" cy="9" r="2.6" fill="#8f7cf0"/><circle cx="12" cy="9" r="2.6" fill="#8f7cf0"/><circle cx="17" cy="9" r="2.6" fill="#8f7cf0"/><path d="M3 18c0-2.5 2-4 4-4s4 1.5 4 4M8 18c0-2.5 2-4 4-4s4 1.5 4 4M13 18c0-2.5 2-4 4-4s4 1.5 4 4" stroke="#8f7cf0" stroke-width="1.6" fill="none"/></svg>`,
+     `하루 ${maxPerDay()}명`, `같은 날은<br>${maxPerDay()}명까지 쉬어요`, exempt.length ? `${exempt.join(", ")}은(는) 인원에 포함되지 않아요.` : ""],
+    ["#e6f4ff", `<svg width="28" height="28" viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 11c0 5.6-7 10-7 10z" fill="#7fb4ff"/></svg>`,
+     `같은 묶음 ${classMax()}명`, "같은 반·연장반은<br>하루 " + classMax() + "명만", "같은 반 담임과 그 반을 지원하는 보조·연장반 선생님, 연장반 선생님끼리는 같은 날 함께 쉴 수 없어요."]
+  ].map(c => `<div class="rule" title="${esc(c[4])}"><div class="ic" style="background:${c[0]}">${c[1]}</div><b>${esc(c[2])}</b><p>${c[3]}</p></div>`).join("");
+  // 묶음 구성 (그대로 유지)
+  const grp = Object.keys(groups).map(c => `<div><b style="color:${classColor(c)}">${esc(c)}</b>${esc(groups[c].join(", "))}</div>`).join("");
+  $("#groups").innerHTML = `<h3><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="9" r="3" fill="#8f7cf0"/><circle cx="16" cy="9" r="3" fill="#c9bdff"/><path d="M3 19c0-3 2.5-5 5-5s5 2 5 5M11 19c0-3 2.5-5 5-5s5 2 5 5" fill="none" stroke="#8f7cf0" stroke-width="2" stroke-linecap="round"/></svg>묶음 구성 <span class="small muted" style="font-family:var(--f-body)">같은 묶음은 하루 ${classMax()}명</span></h3>
+    <div class="grp">${grp || "-"}</div>
+    <p class="contact">연차 담당자 · ${S.d.settings.contactName ? `${esc(S.d.settings.contactName)} 선생님` : "미지정"}</p>`;
+}
+
+/* ---------- settings (managers) ---------- */
+function renderSettings(){
+  const box = $("#settings");
+  if (!isMgr()) { box.hidden = true; return; }
+  if (box.contains(document.activeElement)) return;
+  box.hidden = false;
+  const s = S.d.settings;
+  const closed = Object.keys(S.d.closed).sort().map(d => `${d} ${S.d.closed[d]}`).join("\n");
+  const bal = staffList().map(st => { const b = balanceOf(st.id); return b ? `<tr><td><b>${esc(st.name)}</b></td><td class="num">${dur(b.total)}</td><td class="num">${dur(b.used)}</td><td class="num">${dur(b.remain)}</td><td class="num" style="color:${b.expected<0?"var(--bad)":"inherit"}">${dur(b.expected)}</td><td class="small">${b.missing.length ? b.missing.map(l => esc(shortLabel(l.date)) + (/반차/.test(l.type) ? "½" : "")).join(", ") : `<span class="muted">-</span>`}</td></tr>` : `<tr><td><b>${esc(st.name)}</b></td><td colspan="6" class="muted">연차현황 탭에 없음</td></tr>`; }).join("");
+  const synced = Object.keys(S.d.balances).map(k => S.d.balances[k].syncedAt).sort().pop() || "";
+  const months = [...new Set(S.d.leaves.map(l => l.date.slice(0,7)).concat([today().slice(0,7), `${S.y}-${pad(S.m+1)}`]))].sort();
+  const curYm = `${S.y}-${pad(S.m+1)}`;
+  box.innerHTML = `
+    <div class="cal-head"><h2 style="font-size:1.3rem;flex:1">관리자 설정</h2><span class="muted small">원장님·원감님에게만 보여요</span></div>
+    <h3>연차달력 인쇄</h3>
+    <div class="inline">
+      <select id="pMonth" aria-label="인쇄할 달">${months.map(m => `<option value="${m}" ${m === curYm ? "selected" : ""}>${monthLabel(m)}</option>`).join("")}</select>
+      <label class="check"><input type="checkbox" id="pEvents"> 행사도 함께</label>
+      <button class="btn" id="printBtn" type="button">인쇄하기</button>
+    </div>
+    <p class="small muted">A4 가로로, 날짜별 연차 선생님(파란 글씨)과 대체교사·연락처가 나와요. 인쇄 창에서 "PDF로 저장"을 고르면 파일로도 받을 수 있어요.</p>
+    <h3>연차 담당자</h3>
+    <div class="inline"><label class="check">화면에 표시할 이름 <input type="text" id="sContact" value="${esc(s.contactName)}" placeholder="예: 이영숙" maxlength="20"></label><span class="small muted">선생님들 화면의 "연차 담당자"와 구두 신청 안내에 나와요.</span></div>
+    <h3>연차 신청 기간</h3>
+    <div class="inline">
+      <label class="check">신청 대상 <input type="month" id="sTarget" value="${esc(s.applyTarget)}"></label>
+      <label class="check">시작 <input type="date" id="sOpen" value="${esc(s.applyOpen)}"></label>
+      <label class="check">마감 <input type="date" id="sClose" value="${esc(s.applyClose)}"></label>
+      <button class="ghost" id="sCloseNow" type="button">지금 마감</button>
+    </div>
+    <p class="small muted">시작일부터 마감일까지만 선생님들의 신청 칸이 열려요. 마감 후 구두 신청은 날짜를 눌러 직접 등록해 주세요.</p>
+    <h3>규칙</h3>
+    <div class="inline">
+      <label class="check">하루 최대 <input type="number" id="sMax" min="1" max="20" value="${esc(s.maxPerDay)}">명</label>
+      <label class="check">같은 묶음 하루 최대 <input type="number" id="sCls" min="1" max="5" value="${esc(s.classMax)}">명</label>
+    </div>
+    <h3>휴원일·추가 공휴일</h3>
+    <div class="field"><label for="sClosed">한 줄에 하나, 예: 2026-12-31 휴원</label><textarea id="sClosed">${esc(closed)}</textarea></div>
+    <div class="inline"><button class="btn" id="sSave" type="button">설정 저장</button><span id="sMsg" class="small"></span></div>
+    <h3>교직원 연차 현황</h3>
+    <p class="small muted">한그루 연차대장(기본형) 기준${synced?` (${esc(synced.slice(0,16))} 연동)`:""}. "한그루 미입력"은 달력에는 있지만 한그루 연차대장에 아직 없는 날짜예요. 한그루에 입력해 주세요.</p>
+    <div class="tbl-wrap"><table style="min-width:640px"><thead><tr><th>이름</th><th>연차휴가</th><th>사용</th><th>남은(한그루)</th><th>예상 남은</th><th>한그루 미입력</th></tr></thead><tbody>${bal}</tbody></table></div>`;
+}
+function readSettings(){
+  const closed = {};
+  $("#sClosed").value.split("\n").forEach(line => { const m = line.trim().match(/^(\d{4}-\d{2}-\d{2})\s*(.*)$/); if (m) closed[m[1]] = m[2] || "휴원"; });
+  return { applyTarget:$("#sTarget").value, applyOpen:$("#sOpen").value, applyClose:$("#sClose").value,
+           maxPerDay:Number($("#sMax").value)||3, classMax:Number($("#sCls").value)||1, closed, contactName:$("#sContact").value.trim() };
+}
+
+function renderAll(){ renderHeader(); renderWindow(); renderLegend(); renderCal(); renderDay(); renderTable(); renderLog(); renderRules(); renderSettings(); }
+
+/* ---------- events ---------- */
+$("#prevBtn").onclick = () => { S.m--; if (S.m<0){S.m=11;S.y--;} renderCal(); renderTable(); renderLog(); };
+$("#nextBtn").onclick = () => { S.m++; if (S.m>11){S.m=0;S.y++;} renderCal(); renderTable(); renderLog(); };
+$("#todayBtn").onclick = () => { const t = parse(today()); S.y = t.getFullYear(); S.m = t.getMonth(); renderCal(); renderTable(); renderLog(); };
+$("#cal").addEventListener("click", e => {
+  const c = e.target.closest(".cell[data-date]"); if (!c) return;
+  S.sel = c.dataset.date; S.confirmDel = null; S.editId = null; S.msg = null;
+  renderCal(); renderDay();
+  if (window.innerWidth <= 900) $("#dayPanel").scrollIntoView({behavior:"smooth", block:"start"});
+});
+$("#monthTable").addEventListener("click", e => {
+  const r = e.target.closest("tr[data-date]"); if (!r) return;
+  S.sel = r.dataset.date; S.confirmDel = null; S.editId = null; S.msg = null; renderCal(); renderDay();
+  $("#dayPanel").scrollIntoView({behavior:"smooth", block:"start"});
+});
+$("#dayPanel").addEventListener("change", e => {
+  if (e.target.id === "fStaff" || e.target.id === "fType" || e.target.id === "fEnd") updateWhy();
+  const lid = e.target.dataset.srcfor;
+  if (lid) $("#ctrow-"+lid).hidden = CONTACT_SOURCES.indexOf(e.target.value) < 0;
+});
+$("#dayPanel").addEventListener("click", async e => {
+  const t = e.target;
+  if (t.dataset.askdel) { S.confirmDel = t.dataset.askdel; S.editId = null; renderDay(); return; }
+  if (t.hasAttribute("data-nodel")) { S.confirmDel = null; renderDay(); return; }
+  if (t.dataset.askchg) { S.editId = t.dataset.askchg; S.confirmDel = null; S.msg = null; renderDay(); return; }
+  if (t.hasAttribute("data-chgcancel")) { S.editId = null; renderDay(); return; }
+  try {
+    if (t.dataset.del) { t.disabled = true; S.confirmDel = null; await act("deleteLeave", t.dataset.del); S.msg = {kind:"ok", text:"연차를 취소했어요."}; renderDay(); }
+    else if (t.dataset.delev) { t.disabled = true; S.confirmDel = null; await act("deleteEvent", t.dataset.delev); }
+    else if (t.dataset.chgsave) {
+      const id = t.dataset.chgsave; t.disabled = true;
+      const date = $("#cDate-"+id).value, type = $("#cType-"+id).value;
+      const over = !!($("#cOver-"+id) && $("#cOver-"+id).checked);
+      await act("changeLeave", id, { date, type, override: over });
+      S.editId = null; S.sel = date || S.sel;
+      const d = parse(S.sel); S.y = d.getFullYear(); S.m = d.getMonth();
+      S.msg = {kind:"ok", text:`${label(S.sel)} ${type}(으)로 바꿨어요.`};
+      renderCal(); renderTable(); renderLog(); renderDay();
+    }
+    else if (t.dataset.savesub) {
+      const id = t.dataset.savesub; t.disabled = true;
+      const source = $("#src-"+id).value;
+      const l = S.d.leaves.find(x => x.id === id);
+      const ids = $("#all-"+id) && $("#all-"+id).checked && l ? runOf(l).map(x => x.id) : [id];
+      await act("saveSubs", ids, { source, status:$("#sts-"+id).value, subName:$("#nm-"+id).value.trim(), memo:$("#mm-"+id).value.trim(),
+                                   contact: CONTACT_SOURCES.indexOf(source) >= 0 ? $("#ct-"+id).value.trim() : "" });
+      if (ids.length > 1) { S.msg = {kind:"ok", text:`대체교사 정보를 ${ids.length}일에 함께 저장했어요.`}; renderDay(); }
+    }
+  } catch(err) { S.msg = {kind:"bad", text: err.message}; renderDay(); }
+});
+$("#dayPanel").addEventListener("submit", async e => {
+  e.preventDefault();
+  try {
+    if (e.target.id === "eventForm") {
+      const title = $("#eTitle").value.trim();
+      if (!title) { $("#eTitle").focus(); return; }
+      await act("addEvent", { date:S.sel, end:$("#eEnd").value || "", title, memo:$("#eMemo").value.trim() });
+      return;
+    }
+    const staffId = $("#fStaff").value;
+    const override = !!($("#fOverride") && $("#fOverride").checked);
+    const days = formDays();
+    if (!days.length) { S.msg = {kind:"bad", text:"고른 기간에 근무일이 없어요."}; renderDay(); return; }
+    const b = formProblems(staffId);
+    if (b.length && !(isMgr() && override)) { S.msg = {kind:"bad", text: b.join(" / ")}; renderDay(); return; }
+    $("#fSubmit").disabled = true;
+    const end = days.length > 1 ? $("#fEnd").value : "";
+    await act("addLeave", { date:S.sel, end, staffId, type:$("#fType").value, memo:$("#fMemo").value.trim(), override });
+    S.msg = {kind:"ok", text: days.length > 1
+      ? `${nameOf(staffId)} 선생님 ${shortLabel(days[0])}~${shortLabel(days[days.length-1])} ${days.length}일을 등록했어요.`
+      : `${nameOf(staffId)} 선생님 ${label(S.sel)} 연차를 등록했어요.`};
+    renderDay();
+  } catch(err) { S.msg = {kind:"bad", text: err.message}; renderDay(); }
+});
+$("#settings").addEventListener("click", async e => {
+  const t = e.target;
+  if (t.id === "printBtn") { if (!isMgr()) return; buildPrint($("#pMonth").value, $("#pEvents").checked); window.print(); return; }
+  if (t.id !== "sSave" && t.id !== "sCloseNow") return;
+  const s = readSettings();
+  if (t.id === "sCloseNow") {
+    const y = parse(today()); y.setDate(y.getDate()-1);
+    s.applyClose = ymd(y.getFullYear(), y.getMonth(), y.getDate());
+    if (s.applyOpen && s.applyOpen > s.applyClose) s.applyOpen = s.applyClose;
+  }
+  t.disabled = true;
+  try { t.blur(); await act("saveSettings", s); $("#sMsg").textContent = t.id === "sCloseNow" ? "신청을 마감했어요." : "저장했어요."; }
+  catch(err) { $("#sMsg").textContent = err.message; t.disabled = false; }
+});
+
+/* refresh every minute while visible, so everyone sees the same calendar */
+setInterval(() => { if (S.token && S.d && document.visibilityState === "visible" && !document.querySelector("#dayPanel input:focus, #settings :focus")) load(); }, 60000);
+
+/* keep the deadline countdown current between refreshes */
+setInterval(() => { if (S.d && !$("#appView").hidden) renderWindow(); }, 30000);
+
+if (S.token) load(); else showLogin();
+})();
+</script>
+</body>
+</html>
