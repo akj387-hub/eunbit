@@ -122,33 +122,18 @@ function render() {
   $("lo").hidden = !inn;
   $("hint").textContent = inn ? "아이콘을 눌러 들어가요" : "";
 }
-// 열기 전에 미리 1회용 표를 받아 둬요 (눌렀을 때 바로 열리게)
-var P = {};
-function prefetch() {
-  if (!loggedIn()) return;
-  APPS.forEach(function (a) {
-    if (!T[a.key] || (a.adminOnly && T.noedu)) return;
-    P[a.key] = call(a, { api: "ticket", token: T[a.key] }).then(function (r) { return { r: r, at: Date.now() }; });
-    P[a.key].catch(function () {});
+// 앱 화면은 이 사이트 안에 있어서 누르면 바로 떠요. 구글 서버만 미리 깨워 둬요.
+function warm() {
+  ["duty", "leave", "cert"].forEach(function (k) {
+    var a = APPS.filter(function (x) { return x.key === k; })[0];
+    try { fetch(a.url, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ fn: "__ping", args: [] }) }).catch(function () {}); } catch (e) {}
   });
 }
 function openApp(key) {
   var a = APPS.filter(function (x) { return x.key === key; })[0];
   if (!loggedIn()) { toast("먼저 코드를 넣어 주세요"); $("code").focus(); return; }
   if (a.adminOnly && T.noedu) { toast("교육 관리는 담당자만 들어갈 수 있어요"); return; }
-  var base = a.url + (a.q ? "?" + a.q : "");
-  var go = function (ticket) { location.href = a.url + "?" + (a.q ? a.q + "&" : "") + "t=" + encodeURIComponent(ticket); };
-  if (!T[key]) { location.href = base; return; }
-  toast("열고 있어요…");
-  // 미리 받아 둔 표(90초 안)가 있으면 바로 쓰고, 없으면 지금 받아요
-  var pre = P[key]; delete P[key];
-  (pre ? pre.then(function (x) { return Date.now() - x.at < 90000 ? x.r : null; }).catch(function () { return null; }) : Promise.resolve(null)).then(function (r0) {
-    return r0 || call(a, { api: "ticket", token: T[key] });
-  }).then(function (r) {
-    if (r && r.ok) go(r.ticket);
-    else if (r && /AUTH/.test(r.error || "")) { delete T[key]; save(); toast("한 번 더 로그인해 주세요"); T = {}; save(); render(); }
-    else location.href = base;
-  }).catch(function () { location.href = base; });
+  location.href = key + "/app.html";
 }
 $("lf").onsubmit = function (ev) {
   ev.preventDefault();
@@ -163,15 +148,13 @@ $("lf").onsubmit = function (ev) {
     var core = ["duty", "leave", "cert"].some(function (k) { return nt[k]; });
     if (!core) { er.textContent = /network/.test(msg) ? "연결이 안 돼요. 잠시 뒤 다시 해 주세요." : (msg || "코드가 맞지 않아요."); return; }
     nt.noedu = nt.edu ? "" : "1";
-    T = nt; save(); $("code").value = ""; render(); prefetch();
+    T = nt; save(); $("code").value = ""; render(); warm();
   }).then(function () { b.disabled = false; b.textContent = "들어가기"; });
 };
 $("lo").onclick = function () { if (confirm("로그아웃할까요? 4개 앱 모두 다시 코드를 넣어야 해요.")) { T = {}; save(); render(); } };
 render();
-prefetch();
-// 앱에서 돌아오거나 오래 켜 둔 뒤에도 표를 새로 받아 둬요
-window.addEventListener("pageshow", function () { prefetch(); });
-document.addEventListener("visibilitychange", function () { if (!document.hidden) prefetch(); });
+warm();
+window.addEventListener("pageshow", function () { warm(); });
 </script>
 </body>
 </html>
