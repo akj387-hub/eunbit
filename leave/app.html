@@ -472,9 +472,8 @@ function setData(d, fromCache){
   S.d = d; if (!fromCache) swrSet(d);
   if (!S.y) { const t = parse(d.today); S.y = t.getFullYear(); S.m = t.getMonth(); }
   const st = d.settings;
-  if (!S.jumped && st.applyTarget && st.applyOpen && st.applyClose && d.today <= st.applyClose) {
-    const p = st.applyTarget.split("-").map(Number); S.y = p[0]; S.m = p[1]-1;
-  }
+  // 처음 열 때는 이번 달과 오늘을 보여 줘요. 신청하는 달은 안내 줄의 버튼으로 가요.
+  if (!S.jumped && !S.sel) S.sel = d.today;
   S.jumped = true;
   $("#loginView").hidden = true; $("#appView").hidden = false;
   renderAll();
@@ -588,9 +587,10 @@ function renderWindow(){
   const t = w.target ? monthLabel(w.target) + " 연차 신청" : "연차 신청";
   const cd = countdown(w);
   const right = cd ? `<span class="dday">${esc(cd)}</span>` : "";
+  const go = w.target && (w.status === "before" || w.status === "open") ? `<button class="ghost" id="goTarget" type="button">${Number(w.target.slice(5))}월 달력 보기</button>` : "";
   if (w.status === "none") bar.innerHTML = `<b>연차 신청 기간이 아니에요</b><span class="muted small">신청 기간이 열리면 이곳에 안내돼요.</span>`;
-  else if (w.status === "before") bar.innerHTML = `<b>${esc(t)}</b><span class="when">${label(w.open)} ~ ${label(w.close)}</span><span class="small">아직 열리지 않았어요</span>${right}`;
-  else if (w.status === "open") bar.innerHTML = `<b>${esc(t)} 기간이에요</b><span class="when">${label(w.open)} ~ ${label(w.close)}</span><span class="small">행사 일정을 확인하고 신청해 주세요</span>${right}`;
+  else if (w.status === "before") bar.innerHTML = `<b>${esc(t)}</b><span class="when">${label(w.open)} ~ ${label(w.close)}</span><span class="small">아직 열리지 않았어요</span>${go}${right}`;
+  else if (w.status === "open") bar.innerHTML = `<b>${esc(t)} 기간이에요</b><span class="when">${label(w.open)} ~ ${label(w.close)}</span><span class="small">행사 일정을 확인하고 신청해 주세요</span>${go}${right}`;
   else bar.innerHTML = `<b>${esc(t)} 마감</b><span class="when">${label(w.close)} 마감</span><span class="small">추가 신청·취소는 ${esc(contactWho())}에게 구두로 해 주세요</span>${right}`;
 }
 
@@ -962,6 +962,7 @@ function renderAll(){ renderHeader(); renderWindow(); renderLegend(); renderCal(
 $("#prevBtn").onclick = () => { S.m--; if (S.m<0){S.m=11;S.y--;} renderCal(); renderTable(); renderLog(); };
 $("#nextBtn").onclick = () => { S.m++; if (S.m>11){S.m=0;S.y++;} renderCal(); renderTable(); renderLog(); };
 $("#todayBtn").onclick = () => { const t = parse(today()); S.y = t.getFullYear(); S.m = t.getMonth(); renderCal(); renderTable(); renderLog(); };
+$("#windowBar").addEventListener("click", e => { if (!e.target.closest("#goTarget")) return; const p = S.d.settings.applyTarget.split("-").map(Number); S.y = p[0]; S.m = p[1]-1; renderCal(); renderTable(); if (typeof renderLog === "function") renderLog(); });
 $("#cal").addEventListener("click", e => {
   const c = e.target.closest(".cell[data-date]"); if (!c) return;
   S.sel = c.dataset.date; S.confirmDel = null; S.editId = null; S.msg = null;
