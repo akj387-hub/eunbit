@@ -62,6 +62,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:0}
 .chk{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--muted);font-weight:700;font-size:.85rem}
 .chk.done{background:var(--ok);color:#fff}
 .edu b{display:block;font-weight:500;line-height:1.35} .edu small{color:var(--muted);display:block;line-height:1.35}
+.edu small .dn{display:inline;font-weight:700;color:var(--ink)}
 .edu .go{margin-left:auto;color:var(--muted);font-size:1.3rem}
 .list{display:flex;flex-direction:column;gap:9px}
 
@@ -316,15 +317,51 @@ function renderEdu() {
   document.getElementById("add").onclick = () => openEduForm(null);
   renderStatus();
 }
-function renderStatus() {
+// 이수증 올린 사람 이름 (목록 굵게 표시용). 서버 목록(adminOverview)엔 사람별 정보가 없어서
+// 교육별 상세(adminDetail)를 뒤에서 불러와 기억해 둠. 올린 수(done/total)가 바뀌면 다시 불러옴.
+const DN_KEY = "edu.dn";
+let DN = (() => { try { return JSON.parse(localStorage.getItem(DN_KEY) || "{}") || {}; } catch (e) { return {}; } })();
+function dnSave() { try { localStorage.setItem(DN_KEY, JSON.stringify(DN)); } catch (e) {} }
+function dnPut(year, code, sig, names) { DN[year + "|" + code] = { s: sig, n: names }; dnSave(); }
+function dnNames(e) {
+  if (!e.done) return [];
+  if (e.done === e.total) return e.who.slice();
+  const c = DN[S.year + "|" + e.code];
+  return c && c.s === e.done + "/" + e.total ? c.n : null;
+}
+let dnBusy = false;
+async function dnFill() {
+  if (dnBusy) return; dnBusy = true;
+  try {
+    const year = S.year, need = S.ov.edus.filter(e => e.limit && dnNames(e) === null);
+    let i = 0, got = false;
+    async function worker() {
+      while (i < need.length) {
+        const e = need[i++];
+        try {
+          const d = await call("adminDetail", year, e.code);
+          dnPut(year, e.code, e.done + "/" + e.total, d.staff.filter(s => s.files.length).map(s => s.name)); got = true;
+        } catch (er) {}
+      }
+    }
+    await Promise.all([worker(), worker(), worker()]);
+    if (got && S.year === year && document.getElementById("body")) renderStatus(true);
+  } finally { dnBusy = false; }
+}
+function whoHtml(e) {
+  const dn = dnNames(e) || [];
+  return e.who.map(n => dn.indexOf(n) >= 0 ? `<b class="dn">${esc(n)}</b>` : esc(n)).join(", ") || "(없음)";
+}
+function renderStatus(noFill) {
   const o = S.ov;
   document.getElementById("body").innerHTML = o.edus.length ? `<div class="list">${o.edus.map(e => {
     const pct = e.total ? e.done / e.total * 100 : 0, full = e.total && e.done === e.total;
     return `<button class="edu" data-c="${e.code}"><span class="chk ${full ? "done" : ""}">${full ? "✓" : esc(e.no)}</span>
-      <span style="flex:1;min-width:0"><b>${esc(e.name)}</b><small>${e.closed ? "올리기 끝남 · " : ""}${e.limit ? "지정 " + esc(e.who.join(", ") || "(없음)") : "전원"} · ${e.done}/${e.total}명</small>
+      <span style="flex:1;min-width:0"><b>${esc(e.name)}</b><small>${e.closed ? "올리기 끝남 · " : ""}${e.limit ? "지정 " + whoHtml(e) : "전원"} · ${e.done}/${e.total}명</small>
       <div class="bar" style="margin-top:6px"><i style="width:${pct}%"></i></div></span><span class="go">›</span></button>`;
   }).join("")}</div>` : `<p class="muted" style="text-align:center;padding:30px 0">아직 교육이 없어요.<br>위의 "＋ 교육 추가"로 만들어 주세요.</p>`;
   $app.querySelectorAll(".edu").forEach(el => el.onclick = () => openDetail(el.dataset.c));
+  if (!noFill) dnFill();
 }
 
 // 교육 추가 / 고치기 (e 가 null 이면 새 교육)
@@ -385,6 +422,7 @@ async function openDetail(code) {
   const missing = () => d.staff.filter(s => !s.files.length).map(s => s.name);
   function paint() {
     const have = d.staff.length - missing().length;
+    dnPut(S.year, code, have + "/" + d.staff.length, d.staff.filter(s => s.files.length).map(s => s.name));
     sh.innerHTML = `<div class="top"><h2>${esc(d.name)}</h2><div style="display:flex;gap:6px"><button class="btn line sm" id="gs">설정</button><button class="btn line sm" id="cl">닫기</button></div></div>
       <p class="muted small">${esc(d.year)}년 · ${have}/${d.staff.length}명 올림 (PDF는 이 순서대로 합쳐져요)</p>
       <div>${d.staff.map(s => `<div class="row"><span class="pill ${s.files.length ? "ok" : "no"}">${s.files.length ? "✓" : "—"}</span><div style="flex:1;min-width:0"><b style="font-weight:500">${esc(s.name)}</b>${s.files.map(f => `<div class="small muted">이수 ${esc(f.done || "?")} · 올림 ${esc(f.at.slice(0, 10))} <a href="#" data-dt="${f.id}">날짜 고치기</a></div>`).join("")}</div>
