@@ -560,7 +560,8 @@ function render(){
 // 꼭 바꿔야 할 일당직: 본인 것(교사) + 해결 안 된 전체(관리자)
 function renderAlerts(){
   const el = $("#alerts");
-  const open = S.d.duty.filter(r => r.date >= S.d.today && issueOf(r)).sort((a,b) => a.date < b.date ? -1 : 1);
+  // 아직 공개 안 된 달(through 이후)은 관리자에게도 빼요. 그 달이 공개될 때 같이 보여요
+  const open = S.d.duty.filter(r => r.date >= S.d.today && r.date.slice(0,7) <= S.d.through && issueOf(r)).sort((a,b) => a.date < b.date ? -1 : 1);
   const mine = open.filter(r => r.who === meName());
   const others = isMgr() ? open.filter(r => r.who !== meName()) : [];
   if (!mine.length && !others.length) { el.hidden = true; return; }
